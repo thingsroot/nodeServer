@@ -7,7 +7,6 @@ const path = 'http://ioe.thingsroot.com/api/v1';
 
 // app.use(bodyParser.urlencoded({ extended: false }))
 
-
 // app.use(bodyParser.json())
 app.use(function(req, res, next){
     if (req.method === 'POST'){
@@ -63,6 +62,11 @@ function sendPostAjax (url, headers, query){
 //     })
 // })
 
+app.get('/', function (req, res) {
+    res.send('Hello World');
+})
+
+
 // 转接login 未作处理
 app.post('/user_login', function(req, respons){
      sendPostAjax('/user.login', req.headers, req.body).then(res=>{
@@ -102,6 +106,12 @@ app.get('/token', function(req, respons){
         respons.send(err)
     })
 })
+
+app.get('/applist', function(req, respons){
+    console.log(req)
+    respons.send('asdasd')
+})
+
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
     const arr = [];
@@ -135,7 +145,6 @@ app.get('/gateways_list', function(req, respons){
         //     }
         // })
     }
-
     axios({
         url: path + '/gateways.list',
         method: 'GET',
@@ -151,11 +160,6 @@ app.get('/gateways_list', function(req, respons){
         respons.send(err)
     })
 })
-
-
-
-
-
 
 // 删除网关  未作处理  未测试
 app.post('/gateways_remove', function(req, respons){
@@ -200,6 +204,8 @@ app.post('/gateways_info', function(req, respones){
 
 app.post('/gateways.remove', function(req, respones){
     sendPostAjax('/gateways.remove', req.headers, req.query).then(res=>{
+        console.log(req.query)
+        console.log(req)
         respones.send(res.data)
     }).catch(err=>{
         respons.send(err)
