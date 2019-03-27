@@ -73,9 +73,9 @@ app.post('/user_login', function(req, respons){
         const data = {
             data: res.data,
             status: res.status,
-            statusText: res.statusText
+            statusText: res.statusText,
+            headers: res.headers
         }
-        console.log(res)
         respons.send(data)
      }).catch(err=>{
          respons.send(err)
@@ -114,18 +114,19 @@ app.get('/applist', function(req, respons){
 
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
+    console.log(req)
     const arr = [];
     function getGatewaysList (index, item, headers){
         if (index >= item.length){
+            console.log(arr)
             respons.send({message: arr, status: 'OK'})
-            return false;
         }
-        axios.all([axios.get(path + '/gateways.read?name=' + item[index], axios.get(path + '/gateways.applications.list?gateway=' + item[index]))],{
+        axios.all([http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers})],{
             headers
         }).then(axios.spread(function (acct, perms) {
-            console.log(acct, perms)
+            arr.push({data:acct.data.data, app: perms.data})
             if(index < item.length){
-                getGatewaysList(index + 1, item, headers)
+                getGatewaysList(index + 1, item, req.headers)
             }
         }));
         // axios({
@@ -152,9 +153,9 @@ app.get('/gateways_list', function(req, respons){
     }).then(res=>{
         console.log(res)
         const data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices)
-        sendGetAjax(path + '/gateways.applications.list').then(data=>{
-            console.log(data)
-        })
+        // sendGetAjax(path + '/gateways.applications.list').then(data=>{
+        //     console.log(data)
+        // })
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
@@ -215,6 +216,6 @@ app.post('/gateways.remove', function(req, respones){
 
 
 
-app.listen(8888, function(){
-    console.log('this port is 8888....')
+app.listen(8881, function(){
+    console.log('this port is 8881....')
 })    
