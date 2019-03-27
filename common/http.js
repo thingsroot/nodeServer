@@ -1,5 +1,6 @@
 const axios = require('axios');
 const http = {};
+axios.defaults.withCredentials=true;
 http.get = (url, option)=>{
     return new Promise((resolve, reject)=>{
          axios(url, {
