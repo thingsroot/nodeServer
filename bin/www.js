@@ -121,10 +121,11 @@ app.get('/gateways_list', function(req, respons){
             console.log(arr)
             respons.send({message: arr, status: 'OK'})
         }
-        axios.all([http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers})],{
+        axios.all([http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}), http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})],{
             headers
-        }).then(axios.spread(function (acct, perms) {
-            arr.push({data:acct.data.data, app: perms.data})
+        }).then(axios.spread(function (acct, perms, devices) {
+            console.log(devices)
+            arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
             if(index < item.length){
                 getGatewaysList(index + 1, item, req.headers)
             }
