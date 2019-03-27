@@ -15,8 +15,10 @@ app.use(function(req, res, next){
             str += data
         })
         req.on('end', function(){
-            str = JSON.parse(str);
-            req.body = str;
+            if(str){
+                str = JSON.parse(str);
+                req.body = str;
+            }
             next();
         })
     } else {
@@ -25,7 +27,23 @@ app.use(function(req, res, next){
 })
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
-    const pathname = query ? path + url + query : path + url;
+    let pathname = '';
+    
+    
+    if (query){
+        let str = '';
+        const name = Object.keys(query);
+        const querys = Object.values(query);
+        name.map((item, key)=>{
+            key === 0 ? str += (item + '=' + querys[key]) : str += ('&' + item + '=' + querys[key])
+            
+        })
+        pathname = path + url + '?' + str;
+    } else {
+        pathname = path + url;
+    }
+    
+    console.log(pathname)
     return new Promise((resolve, reject)=>{
         http.get(pathname, {
             headers
@@ -163,6 +181,28 @@ app.get('/gateways_list', function(req, respons){
     })
 })
 
+// 获取网关信息
+app.get('/gateways_read', function(req, respones){
+    sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
+        respones.send(res.data.data)
+    })
+})
+// 获取App列表
+app.get('/gateways_app_list', function(req, respones){
+    sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
+        respones.send(res.data.data);
+    }).catch(err=>{
+        respones.send(err)
+    })
+})
+// 获取网关列表
+app.get('/gateways_dev_list', function(req, respones){
+    sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
+        respones.send(res.data.data);
+    }).catch(err=>{
+        respones.send(err)
+    })
+})
 // 删除网关  未作处理  未测试
 app.post('/gateways_remove', function(req, respons){
     sendPostAjax('/gateways.remove', req.headers, req.query).then(res=>{
