@@ -129,7 +129,11 @@ app.get('/applist', function(req, respons){
     console.log(req)
     respons.send('asdasd')
 })
-
+app.get('/gateways_sn', function(req, respones){
+    http.get(path + '/gateways.list',{headers: req.headers}).then(res=>{
+        respones.send(res.data);
+    })
+})
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
     console.log(req)
@@ -142,28 +146,11 @@ app.get('/gateways_list', function(req, respons){
         axios.all([http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}), http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})],{
             headers
         }).then(axios.spread(function (acct, perms, devices) {
-            console.log(devices)
             arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
             if(index < item.length){
                 getGatewaysList(index + 1, item, req.headers)
             }
         }));
-        // axios({
-        //     url: path + '/gateways.read?name=' + item[index],
-        //     headers,
-        //     method: 'GET'
-        // }).then(res=>{
-        //     axios({
-        //         url: path + '/gateways.applications.list?gateway=' + item[index],
-        //         headers,
-        //         method: 'get'
-        //     }).then(data=>{
-        //         arr.push({data: res.data.data, applist})
-        //     })
-        //     if(index < item.length){
-        //         getGatewaysList(index + 1, item, headers)
-        //     }
-        // })
     }
     axios({
         url: path + '/gateways.list',
@@ -195,13 +182,34 @@ app.get('/gateways_app_list', function(req, respones){
         respones.send(err)
     })
 })
-// 获取网关列表
-app.get('/gateways_dev_list', function(req, respones){
+// 获取网关设备SN
+app.get('/gateways_dev_len', function(req, respones){
     sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
         respones.send(res.data.data);
     }).catch(err=>{
         respones.send(err)
     })
+})
+// 获取网关设备列表
+app.get('/gateways_dev_list', function(req, respones){
+    const arr = [];
+    function getDevicesList (index, item){
+        if (index >= item.length){
+            respones.send({message: arr, status: 'OK'})
+            return false;
+        } else {
+            http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
+                const data = res.data.data;
+                data.meta.sn = item[index];
+                arr.push(data);
+                getDevicesList(index + 1, item, req.headers)
+            })
+        }
+        }
+        
+        sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
+            getDevicesList(0, res.data.data)
+        })
 })
 // 删除网关  未作处理  未测试
 app.post('/gateways_remove', function(req, respons){
@@ -255,6 +263,24 @@ app.post('/gateways.remove', function(req, respones){
 })
 
 
+
+
+
+
+app.get('/applications_list', function(req, respons){
+    axios({
+        url: path + '/applications.list',
+        method: 'GET',
+        headers: req.headers
+    }).then(res=>{
+        console.log(req.headers)
+        console.log(res);
+        respons.send(res.data)
+    }).catch(err=>{
+        console.log('错误')
+        respons.send(err)
+    })
+})
 
 
 app.listen(8881, function(){
