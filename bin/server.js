@@ -5,31 +5,45 @@ const http = require('../common/http');
 const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
-app.use(bodyParser.json({limit: '1mb'}));
-app.use(bodyParser.urlencoded({ extended: true }))
- 
+// app.use(bodyParser.json({limit: '1mb'}));
+// app.use(bodyParser.urlencoded({ extended: true }))
 
-// app.use(bodyParser.json())
-// app.use(function(req, res, next){
-//     if (req.method === 'POST'){
-//             let str = '';
-//             req.on('data',function(data){
-//
-//                 str += data
-//                 console.log(data)
-//         })
-//         req.on('end', function(){
-//             str = JSON.parse(str);
-//             req.body = str;
-//             next();
-//         })
-//     } else {
-//         next();
-//     }
-// })
+app.use(function(req, res, next){
+    if (req.method === 'POST'){
+        let str = '';
+        req.on('data',function(data){
+            str += data
+        })
+        req.on('end', function(){
+            if(str){
+                str = JSON.parse(str);
+                req.body = str;
+            }
+            next();
+        })
+    } else {
+        next();
+    }
+})
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
-    const pathname = query ? path + url + query : path + url;
+    let pathname = '';
+
+
+    if (query){
+        let str = '';
+        const name = Object.keys(query);
+        const querys = Object.values(query);
+        name.map((item, key)=>{
+            key === 0 ? str += (item + '=' + querys[key]) : str += ('&' + item + '=' + querys[key])
+
+        })
+        pathname = path + url + '?' + str;
+    } else {
+        pathname = path + url;
+    }
+
+    console.log(pathname)
     return new Promise((resolve, reject)=>{
         http.get(pathname, {
             headers
@@ -54,87 +68,46 @@ function sendPostAjax (url, headers, query){
     })
 }
 
-//
-app.get('/', function (req, res) {
-    console.log(123)
-    res.send('Hello World8881');
-})
-
-// 转接login   ok
-app.post('/user_login', function(req, respons){
-    sendPostAjax('/user.login', req.headers, req.body).then(res=>{
-        const data = {
-            data: res.data,
-            status: res.status,
-            statusText: res.statusText
-        }
-        console.log(res)
-        respons.send(data)
-    }).catch(err=>{
-        respons.send(err)
-    })
-})
-
+//应用列表   ok
 app.get('/applications_list', function(req, respons){
-    sendGetAjax('/applications.list', req.header, req.query).then(res=>{
-        // const data = {
-        //     data: res.data,
-        //     status: res.status,
-        //     statusText: res.statusText
-        // }
-        console.log(res);
-        respons.send(data)
+    axios({
+        url: path + '/applications.list',
+        method: 'GET',
+        headers: req.headers
+    }).then(res=>{
+        respons.send({message: res.data, status: 'ok'})
     }).catch(err=>{
         respons.send(err)
     })
-})
+});
 
-//应用列表   返回{}
-app.get('/applications_list', function(req, respons){
-    sendGetAjax('/applications.list', req.header, req.query).then(res=>{
-        // const data = {
-        //     data: res.data,
-        //     status: res.status,
-        //     statusText: res.statusText
-        // }
-        // console.log(res);
-        respons.send('123123')
-    }).catch(err=>{
-        respons.send(err)
+//应用详情（版本列表+模板列表）
+app.get('/applications_read', function(req, respons){
+    var message = {};
+    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
+        respons.send(res.data.data)
     })
-
-})
-
-app.post('/user_create', function(req, respons){
-    sendPostAjax('/user.create', req.headers, req.body).then(res=>{
-        const data = {
-            data: res.data,
-            status: res.status,
-            statusText: res.statusText
-        }
-        respons.send(res)
-    }).catch(err=>{
-        respons.send(err)
-    })
-})
-
-
-
-app.post('/applications_remove', function(req, respons){
-    sendPostAjax('/applications.remove', req.headers, req.body).then(res=>{
-        console.log(res)
-        const data = {
-            data: res.data,
-            status: res.status,
-            statusText: res.statusText
-        }
-        respons.send(data)
-    }).catch(err=>{
-        respons.send(err)
-    })
-})
+    // axios.all([http.get(path + '/applications.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}), http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})],{
+    //     headers
+    // }).then(axios.spread(function (acct, perms, devices) {
+    //     console.log(devices)
+    //     arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
+    //     if(index < item.length){
+    //         getGatewaysList(index + 1, item, req.headers)
+    //     }
+    // }));
+    // axios({
+    //     url: path + '/applications.read',
+    //     method: 'GET',
+    //     headers: req.headers
+    // }).then(res=>{
+    //     console.log()
+    //     respons.send(res.data)
+    // }).catch(err=>{
+    //     respons.send(err)
+    // })
+});
 
 
-app.listen(8881, function(){
-    console.log('this port is 8881....')
-})
+module.exports = app;
+

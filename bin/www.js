@@ -4,6 +4,9 @@ const axios = require('axios');
 const http = require('../common/http');
 const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
+const server = require('./server');
+
+app.use(server);
 
 // app.use(bodyParser.urlencoded({ extended: false }))
 
