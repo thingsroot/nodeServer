@@ -264,7 +264,12 @@ app.post('/gateways.remove', function(req, respones){
         respons.send(err)
     })
 })
-
+app.get('/gateway_devf_data', function(req, respones){
+    sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
+        console.log(res);
+        respones.send(res.data);
+    })
+})
 
 
 
