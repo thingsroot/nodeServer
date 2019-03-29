@@ -5,13 +5,9 @@ const http = require('../common/http');
 const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
-// app.use(bodyParser.json({limit: '1mb'}));
-// app.use(bodyParser.urlencoded({ extended: true }))
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
-
-
     if (query){
         let str = '';
         const name = Object.keys(query);
@@ -52,44 +48,103 @@ function sendPostAjax (url, headers, query){
 
 //应用列表   ok
 app.get('/applications_list', function(req, respons){
-    axios({
-        url: path + '/applications.list',
-        method: 'GET',
-        headers: req.headers
-    }).then(res=>{
-        respons.send({message: res.data, status: 'ok'})
-    }).catch(err=>{
-        respons.send(err)
+    sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
+        console.log(req.query);
+        respons.send(res.data)
     })
 });
 
-//应用详情（版本列表+模板列表）
+//应用详情  ok       name: 应用id
 app.get('/applications_read', function(req, respons){
-    var message = {};
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        respons.send(res.data.data)
-    })
-    // axios.all([http.get(path + '/applications.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}), http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})],{
-    //     headers
-    // }).then(axios.spread(function (acct, perms, devices) {
-    //     console.log(devices)
-    //     arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
-    //     if(index < item.length){
-    //         getGatewaysList(index + 1, item, req.headers)
-    //     }
-    // }));
-    // axios({
-    //     url: path + '/applications.read',
-    //     method: 'GET',
-    //     headers: req.headers
-    // }).then(res=>{
-    //     console.log()
-    //     respons.send(res.data)
-    // }).catch(err=>{
-    //     respons.send(err)
-    // })
+        respons.send(res.data)
+    });
 });
 
+//应用描述  ok       name: 应用id
+app.get('/applications_desc', function(req, respons){
+    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
+        respons.send(res.data.data.description)
+    });
+});
+
+//应用版本列表  ok     app: 应用id
+app.get('/applications_versions_list', function(req, respons){
+    sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
+        console.log(req.query);
+        respons.send(res.data)
+    })
+});
+
+//应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
+app.post('/applications_versions_create', function(req, respons){
+    console.log(req.body);
+    sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
+        respons.send(res.data)
+    })
+});
+
+//应用模板列表(应用模板最新版本)  ok      app: 应用id
+app.get('/store_configurations_list', function (req, respons) {
+    sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
+        let list = [];
+        function getLatestVersion(index, item) {
+            if (index >= item.length) {
+                respons.send({message: list, status: 'ok'});
+                return false;
+            } else {
+                console.log(item[index]);
+                sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
+                    list && list.length > 0 &&list.map((v)=>{
+                        if (v.name === item[index]) {
+                            v['latest_version'] = res.data.data;
+                        }
+                    });
+                    getLatestVersion(index + 1, item, req.headers)
+                })
+            }
+        }
+        list = res.data.data;
+        let arr = [];
+        console.log(list);
+        list && list.length > 0 &&list.map((v)=>{
+            arr.push(v.name)
+            console.log(v.name)
+        });
+        console.log(arr);
+        getLatestVersion(0, arr);
+    })
+});
+
+
+// {
+//     "app_name": "string",     应用名称
+//     "code_name": "string",    文件名
+//     "has_conf_template": 0,   是否有配置模板
+//     "license_type": "Open",   授权类型
+//     "star": 0,                评星
+//     "description": "string",  描述
+//     "conf_template": "string",
+//     "pre_configuration": "string",    配置模板
+//     "keywords": [
+//          "string"
+//      ]
+// }
+
+//创建新应用   nonono
+app.post('/applications_create', function(req, respons){
+    sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
+        respons.send(res.data)
+    })
+});
 
 module.exports = app;
+
+
+
+//应用   创建、修改、上传新版本
+//消息   列表、查询、详情、确认消息、
+//模板   保存
+//个人信息  获取、认证旧密码、修改密码
+//首页   获取表数据
 
