@@ -8,6 +8,8 @@ const path = 'http://ioe.thingsroot.com/api/v1';
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
+
+
     if (query){
         let str = '';
         const name = Object.keys(query);
@@ -45,6 +47,28 @@ function sendPostAjax (url, headers, query){
         })
     })
 }
+//首页数据
+app.get('/home', function (req, respons) {
+    sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
+        console.log(req.query);
+        respons.send(res.data)
+    })
+
+});
+
+
+//个人信息
+app.get('/user_read', function (req, respons) {
+    console.log(req);
+    sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
+        console.log(res.data)
+    })
+    // sendGetAjax('/user.read', req.headers).then(res=>{
+    //     // respons.send(res.data)
+    //
+    // })
+
+});
 
 //应用列表   ok
 app.get('/applications_list', function(req, respons){
@@ -95,7 +119,7 @@ app.get('/store_configurations_list', function (req, respons) {
             } else {
                 console.log(item[index]);
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
-                    list && list.length > 0 &&list.map((v)=>{
+                    list && list.length > 0 && list.map((v)=>{
                         if (v.name === item[index]) {
                             v['latest_version'] = res.data.data;
                         }
@@ -107,15 +131,14 @@ app.get('/store_configurations_list', function (req, respons) {
         list = res.data.data;
         let arr = [];
         console.log(list);
-        list && list.length > 0 &&list.map((v)=>{
-            arr.push(v.name)
+        list && list.length > 0 && list.map((v)=>{
+            arr.push(v.name);
             console.log(v.name)
         });
         console.log(arr);
         getLatestVersion(0, arr);
     })
 });
-
 
 // {
 //     "app_name": "string",     应用名称
@@ -137,6 +160,23 @@ app.post('/applications_create', function(req, respons){
         respons.send(res.data)
     })
 });
+
+
+//平台事件  列表+总数
+app.get('/platform_activities_list', function (req, respons) {
+    let data = {};
+    // sendGetAjax('/'+ req.query.category +'.activities.list?name=' + req.query.name +
+    //     '&start=' + req.query.start + '&limit=' + req.query.limit , req.headers).then(res=>{
+    //     data['list'] = res.data.data;
+    //     sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
+    //         data['count'] = res.data.data;
+    //         respons.send({message: data, status: 'ok'})
+    //     })
+    // });
+    axios
+
+});
+
 
 module.exports = app;
 
