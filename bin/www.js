@@ -7,7 +7,12 @@ const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 
 app.use(server);
-
+app.use(function (req, res, next) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+  });
 // app.use(bodyParser.urlencoded({ extended: false }))
 
 // app.use(bodyParser.json())
@@ -70,23 +75,6 @@ function sendPostAjax (url, headers, query){
         })
     })
 }
-// 粘贴post
-// app.post('/', function(req, respones){
-//     sendPostAjax('/', req.headers, req.query).then(res=>{
-//         respones.send(res.data)
-//     })
-// })
-// 粘贴get
-// app.get('/', function(req,respones){
-//     sendGetAjax('/', req.headers, req.query).then(res=>{
-//         respones.send(res.data)
-//     })
-// })
-
-app.get('/', function (req, res) {
-    res.send('Hello World');
-})
-
 
 // 转接login 未作处理
 app.post('/user_login', function(req, respons){
@@ -139,16 +127,18 @@ app.get('/gateways_sn', function(req, respones){
 })
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
-    console.log(req)
     const arr = [];
     function getGatewaysList (index, item, headers){
         if (index >= item.length){
-            console.log(arr)
             respons.send({message: arr, status: 'OK'})
         }
-        axios.all([http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}), http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}), http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})],{
-            headers
-        }).then(axios.spread(function (acct, perms, devices) {
+        axios.all(
+            [
+                http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}),
+                http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}),
+                http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})
+            ]
+        ).then(axios.spread(function (acct, perms, devices) {
             arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
             if(index < item.length){
                 getGatewaysList(index + 1, item, req.headers)
@@ -160,17 +150,12 @@ app.get('/gateways_list', function(req, respons){
         method: 'GET',
         headers: req.headers
     }).then(res=>{
-        console.log(res)
         const data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices)
-        // sendGetAjax(path + '/gateways.applications.list').then(data=>{
-        //     console.log(data)
-        // })
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
     })
 })
-
 // 获取网关信息
 app.get('/gateways_read', function(req, respones){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
@@ -179,12 +164,43 @@ app.get('/gateways_read', function(req, respones){
 })
 // 获取App列表
 app.get('/gateways_app_list', function(req, respones){
+    const arr = [];
+    function getAppList(index, item){
+        if(index >= item.length){
+            respones.send({message: arr, ok: true})
+            return false;
+        } else {
+            http.get(path + '/store.read?name=' + item[index].name, req.headers).then(res=>{
+                if(!res.data.error){
+                    item[index].data = res.data;
+                    if (item[index].data.data.icon_image !== undefined){
+                        item[index].data.data.icon_image = 'http://ioe.thingsroot.com' + item[index].data.data.icon_image;
+                    } else {
+                        item[index].data.data.icon_image = 'http://ioe.thingsroot.com/assets/app_center/img/logo.png';
+                    }
+                }
+                arr.push(item[index])
+                getAppList(index + 1, item)
+            })
+        }
+    }
     sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
-        respones.send(res.data.data);
+        const data = res.data.data;
+        const keys = Object.keys(data)
+        const values = Object.values(data)
+        values.map((item, key)=>{
+          if (item.running){
+              item.status = 'running';
+              item.running = new Date(parseInt(item.running) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ')
+          }
+        item.device_name = keys[key];
+        })
+            getAppList(0, values)
     }).catch(err=>{
         respones.send(err)
     })
 })
+
 // 获取网关设备SN
 app.get('/gateways_dev_len', function(req, respones){
     sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
@@ -208,8 +224,7 @@ app.get('/gateways_dev_list', function(req, respones){
                 getDevicesList(index + 1, item, req.headers)
             })
         }
-        }
-        
+    }
         sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
             getDevicesList(0, res.data.data)
         })
@@ -223,11 +238,11 @@ app.post('/gateways_remove', function(req, respons){
     })
 })
 //获取APP列表 未作处理 未测试
-app.get('/gateways_applications_list', function(req, respons){
-    sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
+app.get('/store_list', function(req, respons){
+    sendGetAjax('/store.list', req.headers).then(res=>{
         respons.send(res.data)
     }).catch(err=>{
-        respons.send(err)
+        respons.send(err.data)
     })
 })
 // 安装APP 未作处理 未测试
@@ -254,7 +269,7 @@ app.post('/gateways_info', function(req, respones){
         respons.send(err)
     })
 })
-
+// 删除网关 未处理 未测试
 app.post('/gateways.remove', function(req, respones){
     sendPostAjax('/gateways.remove', req.headers, req.query).then(res=>{
         console.log(req.query)
@@ -264,29 +279,27 @@ app.post('/gateways.remove', function(req, respones){
         respons.send(err)
     })
 })
+// 获取  未处理 未测试
 app.get('/gateway_devf_data', function(req, respones){
     sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
         console.log(res);
         respones.send(res.data);
     })
 })
+app.get('/store_read', function(req, respones){
+    sendGetAjax('/store.read', req.headers, req.query).then(res=>{
+        console.log(res)
+        respones.send(res.data)
+    })
+})
+// 设定设备输出项数据
 
-
-
-
-
-app.get('/applications_list', function(req, respons){
-    axios({
-        url: path + '/applications.list',
-        method: 'GET',
-        headers: req.headers
-    }).then(res=>{
-        console.log(req.headers)
-        console.log(res);
-        respons.send(res.data)
+app.post('/gateways_dev_outputs', function(req, respones){
+    sendPostAjax('/gateways.devices.output', req.headers, req.body).then(res=>{
+        console.log(res)
+        respones.send(res.data);
     }).catch(err=>{
-        console.log('错误')
-        respons.send(err)
+        respones.send(err.data)
     })
 })
 
