@@ -5,25 +5,38 @@ const http = require('../common/http');
 // const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
+
+app.use(function(req, res, next){
+    if (req.method === 'POST'){
+        let str = '';
+        req.on('data',function(data){
+            str += data
+        })
+        req.on('end', function(){
+            if(str){
+                str = JSON.parse(str);
+                req.body = str;
+            }
+            next();
+        })
+    } else {
+        next();
+    }
+})
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
-
-
     if (query){
         let str = '';
         const name = Object.keys(query);
         const querys = Object.values(query);
         name.map((item, key)=>{
             key === 0 ? str += (item + '=' + querys[key]) : str += ('&' + item + '=' + querys[key])
-
-        })
+        });
         pathname = path + url + '?' + str;
     } else {
         pathname = path + url;
     }
-
-    console.log(pathname)
     return new Promise((resolve, reject)=>{
         http.get(pathname, {
             headers
@@ -47,6 +60,7 @@ function sendPostAjax (url, headers, query){
         })
     })
 }
+
 //首页数据
 app.get('/home', function (req, respons) {
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
@@ -55,9 +69,7 @@ app.get('/home', function (req, respons) {
     })
 
 });
-
-
-//个人信息
+//个人信息   未完成
 app.get('/user_read', function (req, respons) {
     console.log(req);
     sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
@@ -102,11 +114,12 @@ app.get('/applications_versions_list', function(req, respons){
 
 //应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
 app.post('/applications_versions_create', function(req, respons){
-    console.log(req.body);
     sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
+        console.log(res.data)
         respons.send(res.data)
     })
 });
+
 
 //应用模板列表(应用模板最新版本)  ok      app: 应用id
 app.get('/store_configurations_list', function (req, respons) {
@@ -162,21 +175,67 @@ app.post('/applications_create', function(req, respons){
 });
 
 
-//平台事件  列表+总数
-app.get('/platform_activities_list', function (req, respons) {
+// 平台事件  列表+总数   ok
+app.get('/platform_activities_lists', function (req, respons) {
+    console.log(req)
     let data = {};
-    // sendGetAjax('/'+ req.query.category +'.activities.list?name=' + req.query.name +
-    //     '&start=' + req.query.start + '&limit=' + req.query.limit , req.headers).then(res=>{
-    //     data['list'] = res.data.data;
-    //     sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
-    //         data['count'] = res.data.data;
-    //         respons.send({message: data, status: 'ok'})
-    //     })
-    // });
-    axios
-
+    axios({
+        url: path + '/'+ req.query.category +'.activities.list',
+        method: 'GET',
+        data: {
+            name: req.query.name,
+            start: req.query.start,
+            limit: req.query.limit,
+            filters: JSON.parse(req.query.filters)
+        },
+        headers: req.headers
+    }).then(res=>{
+        data['list'] = res.data;
+        sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
+            data['count'] = res.data.data;
+            console.log(data);
+            respons.send({data: data, ok: true})
+        })
+    })
 });
 
+//确认消息
+app.get('/activities_disponse', function (req, respons) {
+    axios({
+        url: path + '/'+ req.query.category +'.activities.disponse',
+        method: 'GET',
+        data: {
+            name: req.query.name
+        },
+        headers: req.headers
+    }).then(res=>{
+        respons.send({data: res.data, ok: true})
+    })
+});
+
+
+//设备事件列表
+app.get('/device_events_list', function (req, respons) {
+    let data = {};
+    axios({
+        url: path + '/'+ req.query.category +'.events.list',
+        method: 'GET',
+        data: {
+            name: req.query.name,
+            start: req.query.start,
+            limit: req.query.limit,
+            filters: JSON.parse(req.query.filters)
+        },
+        headers: req.headers
+    }).then(res=>{
+        data['list'] = res.data;
+        sendGetAjax('/'+ req.query.category +'.events.count?name=' + req.query.name, req.headers).then(res=>{
+            data['count'] = res.data.data;
+            console.log({data: data, ok: true});
+            respons.send({data: data, ok: true})
+        })
+    })
+});
 
 module.exports = app;
 
