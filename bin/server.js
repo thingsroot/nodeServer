@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
 // 封装ajax get方式

@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 
@@ -228,7 +228,22 @@ app.get('/gateways_app_list', function(req, respones){
         respones.send(err)
     })
 })
-
+// 网关应用开启
+app.post('/gateways_applications_start', function(req, respones){
+    sendPostAjax('/gateways.applications.start', req.headers, req.body).then(res=>{
+        res.send(res.data)
+    }).catch(err=>{
+        respones.send({message: 'error', ok: false})
+    })
+})
+// 网关应用关闭
+app.post('/gateways_applications_stop', function(req, respones){
+    sendPostAjax('/gateways.applications.stop', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send({message: 'error', ok: false})
+    })
+})
 // 获取网关设备SN
 app.get('/gateways_dev_len', function(req, respones){
     sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
