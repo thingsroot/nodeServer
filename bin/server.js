@@ -2,27 +2,9 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
-const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
 
-app.use(function(req, res, next){
-    if (req.method === 'POST'){
-        let str = '';
-        req.on('data',function(data){
-            str += data
-        })
-        req.on('end', function(){
-            if(str){
-                str = JSON.parse(str);
-                req.body = str;
-            }
-            next();
-        })
-    } else {
-        next();
-    }
-})
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
@@ -64,7 +46,6 @@ function sendPostAjax (url, headers, query){
 //首页数据
 app.get('/home', function (req, respons) {
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        console.log(req.query);
         respons.send(res.data)
     })
 
@@ -85,7 +66,6 @@ app.get('/user_read', function (req, respons) {
 //应用列表   ok
 app.get('/applications_list', function(req, respons){
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        console.log(req.query);
         respons.send(res.data)
     })
 });
@@ -107,7 +87,6 @@ app.get('/applications_desc', function(req, respons){
 //应用版本列表  ok     app: 应用id
 app.get('/applications_versions_list', function(req, respons){
     sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
-        console.log(req.query);
         respons.send(res.data)
     })
 });
@@ -115,7 +94,6 @@ app.get('/applications_versions_list', function(req, respons){
 //应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
 app.post('/applications_versions_create', function(req, respons){
     sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-        console.log(res.data)
         respons.send(res.data)
     })
 });
@@ -130,7 +108,6 @@ app.get('/store_configurations_list', function (req, respons) {
                 respons.send({message: list, status: 'ok'});
                 return false;
             } else {
-                console.log(item[index]);
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
                     list && list.length > 0 && list.map((v)=>{
                         if (v.name === item[index]) {
@@ -143,12 +120,9 @@ app.get('/store_configurations_list', function (req, respons) {
         }
         list = res.data.data;
         let arr = [];
-        console.log(list);
         list && list.length > 0 && list.map((v)=>{
             arr.push(v.name);
-            console.log(v.name)
         });
-        console.log(arr);
         getLatestVersion(0, arr);
     })
 });
@@ -177,7 +151,6 @@ app.post('/applications_create', function(req, respons){
 
 // 平台事件  列表+总数   ok
 app.get('/platform_activities_lists', function (req, respons) {
-    console.log(req)
     let data = {};
     axios({
         url: path + '/'+ req.query.category +'.activities.list',
@@ -193,7 +166,6 @@ app.get('/platform_activities_lists', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            console.log(data);
             respons.send({data: data, ok: true})
         })
     })
@@ -202,10 +174,10 @@ app.get('/platform_activities_lists', function (req, respons) {
 //确认消息
 app.get('/activities_disponse', function (req, respons) {
     axios({
-        url: path + '/'+ req.query.category +'.activities.disponse',
+        url: path + '/user.activities.disponse',
         method: 'GET',
         data: {
-            name: req.query.name
+            name: '9901d9c1fb'
         },
         headers: req.headers
     }).then(res=>{
@@ -231,7 +203,6 @@ app.get('/device_events_list', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.events.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            console.log({data: data, ok: true});
             respons.send({data: data, ok: true})
         })
     })
