@@ -63,11 +63,11 @@ function sendGetAjax (url, headers, query){
     })
 }
 // 封装ajax post方式
-function sendPostAjax (url, headers, query){
+function sendPostAjax (url, headers, body){
     return new Promise((resolve, reject)=>{
-        http.post(path + url,{
+        http.post(path + url, {
             headers: headers,
-            data: query
+            data: body
         }).then(res=>{
             resolve(res)
         }).catch(err=>{
@@ -78,7 +78,8 @@ function sendPostAjax (url, headers, query){
 
 // 转接login 未作处理
 app.post('/user_login', function(req, respons){
-     sendPostAjax('/user.login', req.headers, req.body).then(res=>{
+     sendPostAjax('/user.login', undefined, req.body).then(res=>{
+         console.log(res)
         const data = {
             data: res.data,
             status: res.status,
@@ -87,7 +88,7 @@ app.post('/user_login', function(req, respons){
         }
         respons.send(data)
      }).catch(err=>{
-         respons.send(err)
+         respons.send({message: 'error', ok: false})
      })
 })
 // 注册账户 未作处理
@@ -125,6 +126,13 @@ app.get('/gateways_sn', function(req, respones){
         respones.send(res.data);
     })
 })
+app.get('/user_csrf_token', function(req, respones){
+    console.log(req)
+    sendGetAjax('/user.csrf_token', req.headers).then(res=>{
+        console.log(res)
+        respones.send(res.data);
+    })
+})
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
     const arr = [];
@@ -154,6 +162,26 @@ app.get('/gateways_list', function(req, respons){
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
+    })
+})
+// 删除设备安装应用
+app.post('/applications_remove', function(req, respones){
+    console.log(req)
+    sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
+        console.log(res);
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send({message: 'error', ok: false})
+    })
+})
+// 增加gatews网关
+app.post('/gateways_create', function(req, respones){
+    sendPostAjax('/gateways.create', req.headers, req.body).then(res=>{
+        console.log(res);
+        respones.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+        respones.send({message: 'error', ok: false})
     })
 })
 // 获取网关信息
@@ -231,10 +259,11 @@ app.get('/gateways_dev_list', function(req, respones){
 })
 // 删除网关  未作处理  未测试
 app.post('/gateways_remove', function(req, respons){
-    sendPostAjax('/gateways.remove', req.headers, req.query).then(res=>{
+    sendPostAjax('/gateways.remove', req.headers, req.body).then(res=>{
         respons.send(res.data)
     }).catch(err=>{
-        respons.send(err)
+        console.log(err)
+        respons.send({message: 'error', ok: false})
     })
 })
 //获取APP列表 未作处理 未测试
@@ -247,7 +276,7 @@ app.get('/store_list', function(req, respons){
 })
 // 安装APP 未作处理 未测试
 app.post('/gateways_applications_install', function(){
-    sendPostAjax('/gateways.applications.install', req.headers, req.query).then(res=>{
+    sendPostAjax('/gateways.applications.install', req.headers, req.body).then(res=>{
         respons.send(res.data)
     }).catch(err=>{
         respons.send(err)
@@ -255,25 +284,25 @@ app.post('/gateways_applications_install', function(){
 })
 // 删除APP 未做处理 未测试
 app.post('/gateways_applications_remove', function(req, respones){
-    sendPostAjax('/gateways.applications.remove', req.headers, req.query).then(res=>{
+    sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         respons.send(err)
+    })
+})
+// 网关操作指令结果查询
+app.get('/gateways_exec_result', function(req, respones){
+    sendGetAjax('/gateways.exec_result', req.headers, req.query).then(res=>{
+        console.log(res);
+        respones.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+        respones.send({message: 'error', ok: false})
     })
 })
 // 网关信息查询 未做处理 未测试
 app.post('/gateways_info', function(req, respones){
-    sendPostAjax('/gateways.info', req.headers, req.query).then(res=>{
-        respones.send(res.data)
-    }).catch(err=>{
-        respons.send(err)
-    })
-})
-// 删除网关 未处理 未测试
-app.post('/gateways.remove', function(req, respones){
-    sendPostAjax('/gateways.remove', req.headers, req.query).then(res=>{
-        console.log(req.query)
-        console.log(req)
+    sendPostAjax('/gateways.info', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         respons.send(err)
@@ -283,6 +312,11 @@ app.post('/gateways.remove', function(req, respones){
 app.get('/gateway_devf_data', function(req, respones){
     sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
         console.log(res);
+        res.data && res.data.length > 0 && res.data.map((item)=>{
+                    if (!item.vt){
+                        item.vt = 'float'
+                    }
+                })
         respones.send(res.data);
     })
 })
@@ -292,6 +326,8 @@ app.get('/store_read', function(req, respones){
         respones.send(res.data)
     })
 })
+
+
 // 设定设备输出项数据
 
 app.post('/gateways_dev_outputs', function(req, respones){
@@ -299,7 +335,8 @@ app.post('/gateways_dev_outputs', function(req, respones){
         console.log(res)
         respones.send(res.data);
     }).catch(err=>{
-        respones.send(err.data)
+        console.log(err)
+        respones.send({message: 'error', ok: false})
     })
 })
 

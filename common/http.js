@@ -23,7 +23,7 @@ http.post = async (url, option)=>{
         axios(url, {
             method: 'POST',
             data: JSON.stringify(option.data) || '',
-            headers:option.headrs || {
+            headers:option.headers || {
                 Accept: 'application/json; charset=utf-8',
                 'Content-Type': 'application/json; charset=utf-8',
                 'dataType': 'json'
