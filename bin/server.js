@@ -44,68 +44,68 @@ function sendPostAjax (url, headers, query){
 }
 
 //首页数据
-app.get('/home', function (req, respons) {
+app.get('/home', function (req, respones) {
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     })
 
 });
 //个人信息   未完成
-app.get('/user_read', function (req, respons) {
+app.get('/user_read', function (req, respones) {
     console.log(req);
     sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
         console.log(res.data)
     })
     // sendGetAjax('/user.read', req.headers).then(res=>{
-    //     // respons.send(res.data)
+    //     // respones.send(res.data)
     //
     // })
 
 });
 
 //应用列表   ok
-app.get('/applications_list', function(req, respons){
+app.get('/applications_list', function(req, respones){
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     })
 });
 
 //应用详情  ok       name: 应用id
-app.get('/applications_read', function(req, respons){
+app.get('/applications_read', function(req, respones){
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     });
 });
 
 //应用描述  ok       name: 应用id
-app.get('/applications_desc', function(req, respons){
+app.get('/applications_desc', function(req, respones){
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        respons.send(res.data.data.description)
+        respones.send(res.data.data.description)
     });
 });
 
 //应用版本列表  ok     app: 应用id
-app.get('/applications_versions_list', function(req, respons){
+app.get('/applications_versions_list', function(req, respones){
     sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     })
 });
 
 //应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
-app.post('/applications_versions_create', function(req, respons){
+app.post('/applications_versions_create', function(req, respones){
     sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     })
 });
 
 
 //应用模板列表(应用模板最新版本)  ok      app: 应用id
-app.get('/store_configurations_list', function (req, respons) {
+app.get('/store_configurations_list', function (req, respones) {
     sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
         let list = [];
         function getLatestVersion(index, item) {
             if (index >= item.length) {
-                respons.send({message: list, status: 'ok'});
+                respones.send({message: list, status: 'ok'});
                 return false;
             } else {
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
@@ -142,15 +142,14 @@ app.get('/store_configurations_list', function (req, respons) {
 // }
 
 //创建新应用   nonono
-app.post('/applications_create', function(req, respons){
+app.post('/applications_create', function(req, respones){
     sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
-        respons.send(res.data)
+        respones.send(res.data)
     })
 });
 
-
 // 平台事件  列表+总数   ok
-app.get('/platform_activities_lists', function (req, respons) {
+app.get('/platform_activities_lists', function (req, respones) {
     let data = {};
     axios({
         url: path + '/'+ req.query.category +'.activities.list',
@@ -166,28 +165,42 @@ app.get('/platform_activities_lists', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            respons.send({data: data, ok: true})
+            respones.send({data: data, ok: true})
         })
     })
 });
 
-//确认消息
-app.get('/activities_disponse', function (req, respons) {
-    axios({
-        url: path + '/user.activities.disponse',
-        method: 'GET',
-        data: {
-            name: '9901d9c1fb'
-        },
-        headers: req.headers
-    }).then(res=>{
-        respons.send({data: res.data, ok: true})
+//获取消息详情    nonono
+app.get('/activities_message_read', function (req, respones) {
+    sendGetAjax('/'+ req.query.category +'.activities.read?name=' + req.query.name, req.headers).then(res=>{
+        console.log(res.data);
+        respones.send(res.data);
     })
 });
 
+//确认消息    nonono
+// app.post('/activities_disponse', function (req, respones) {
+//     console.log(req);
+//     // axios({
+//     //     url: path + '/'+ req.body.category +'.activities.disponse',
+//     //     method: 'POST',
+//     //     data: {
+//     //         name: req.body.name
+//     //     },
+//     //     headers: req.headers
+//     // }).then(res=>{
+//     //     respones.send({data: res.data, ok: true})
+//     // })
+//     // sendPostAjax('/user.activities.disponse', req.header, {
+//     //     name: req.query.name
+//     // }).then(res=>{
+//     //     console.log(res.data);
+//     //     respones.send(res.data)
+//     // })
+// });
 
 //设备事件列表
-app.get('/device_events_list', function (req, respons) {
+app.get('/device_events_list', function (req, respones) {
     let data = {};
     axios({
         url: path + '/'+ req.query.category +'.events.list',
@@ -203,14 +216,12 @@ app.get('/device_events_list', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.events.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            respons.send({data: data, ok: true})
+            respones.send({data: data, ok: true})
         })
     })
 });
 
 module.exports = app;
-
-
 
 //应用   创建、修改、上传新版本
 //消息   列表、查询、详情、确认消息、
