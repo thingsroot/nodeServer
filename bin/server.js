@@ -2,9 +2,33 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
+<<<<<<< HEAD
+// const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
 
+// app.use(function(req, res, next){
+//     if (req.method === 'POST'){
+//         let str = '';
+//         req.on('data',function(data){
+//             str += data
+//         })
+//         req.on('end', function(){
+//             if(str){
+//                 str = JSON.parse(str);
+//                 req.body = str;
+//             }
+//             next();
+//         })
+//     } else {
+//         next();
+//     }
+// })
+=======
+const path = 'http://ioe.thingsroot.com/api/v1';
+
+
+>>>>>>> c9ceed7c47641b1277ea86b2b222bfe5c51fbd39
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
@@ -55,6 +79,7 @@ app.get('/user_read', function (req, respones) {
     console.log(req);
     sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
         console.log(res.data)
+        respons.send(res.data)
     })
     // sendGetAjax('/user.read', req.headers).then(res=>{
     //     // respones.send(res.data)
