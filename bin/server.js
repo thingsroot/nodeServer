@@ -6,23 +6,23 @@ const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
 
 
-app.use(function(req, res, next){
-    if (req.method === 'POST'){
-        let str = '';
-        req.on('data',function(data){
-            str += data
-        })
-        req.on('end', function(){
-            if(str){
-                str = JSON.parse(str);
-                req.body = str;
-            }
-            next();
-        })
-    } else {
-        next();
-    }
-})
+// app.use(function(req, res, next){
+//     if (req.method === 'POST'){
+//         let str = '';
+//         req.on('data',function(data){
+//             str += data
+//         })
+//         req.on('end', function(){
+//             if(str){
+//                 str = JSON.parse(str);
+//                 req.body = str;
+//             }
+//             next();
+//         })
+//     } else {
+//         next();
+//     }
+// })
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
@@ -74,6 +74,7 @@ app.get('/user_read', function (req, respons) {
     console.log(req);
     sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
         console.log(res.data)
+        respons.send(res.data)
     })
     // sendGetAjax('/user.read', req.headers).then(res=>{
     //     // respons.send(res.data)
