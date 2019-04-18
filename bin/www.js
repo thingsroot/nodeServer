@@ -5,7 +5,6 @@ const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 
-app.use(server);
 app.use(function (req, res, next) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -13,7 +12,7 @@ app.use(function (req, res, next) {
     next();
   });
 // app.use(bodyParser.urlencoded({ extended: false }))
-
+app.use(server);
 // app.use(bodyParser.json())
 app.use(function(req, res, next){
     if (req.method === 'POST'){
@@ -396,7 +395,10 @@ app.post('/gateways_dev_outputs', function(req, respones){
         console.log(err)
         respones.send({message: 'error', ok: false})
     })
-})
+});
+
+
+
 
 
 app.listen(8881, function(){
