@@ -2,33 +2,14 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
-<<<<<<< HEAD
-// const bodyParser = require('body-parser');
 const path = 'http://ioe.thingsroot.com/api/v1';
+const block = {
+    display: 'block'
+};
+const none = {
+    display: 'none'
+};
 
-
-// app.use(function(req, res, next){
-//     if (req.method === 'POST'){
-//         let str = '';
-//         req.on('data',function(data){
-//             str += data
-//         })
-//         req.on('end', function(){
-//             if(str){
-//                 str = JSON.parse(str);
-//                 req.body = str;
-//             }
-//             next();
-//         })
-//     } else {
-//         next();
-//     }
-// })
-=======
-const path = 'http://ioe.thingsroot.com/api/v1';
-
-
->>>>>>> c9ceed7c47641b1277ea86b2b222bfe5c51fbd39
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
@@ -67,70 +48,42 @@ function sendPostAjax (url, headers, query){
     })
 }
 
-//首页数据
-app.get('/home', function (req, respons) {
-    sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+//个人信息   ok
+app.get('/user_read', function (req, response) {
+    console.log(req.query);
+    sendGetAjax('/user.read', req.headers, req.query).then(res=>{
+        console.log(res.data);
+        response.send(res.data)
     })
-
-});
-//个人信息   未完成
-app.get('/user_read', function (req, respons) {
-    console.log(req);
-    sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
-        console.log(res.data)
-        respons.send(res.data)
-    })
-    // sendGetAjax('/user.read', req.headers).then(res=>{
-    //     // respons.send(res.data)
-    //
-    // })
-
 });
 
 //应用列表   ok
-app.get('/applications_list', function(req, respons){
+app.get('/applications_list', function(req, response){
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
+        response.send(res.data)
     })
 });
 
-//应用详情  ok       name: 应用id
-app.get('/applications_read', function(req, respons){
-    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        respons.send(res.data)
-    });
-});
-
-//应用描述  ok       name: 应用id
-app.get('/applications_desc', function(req, respons){
-    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        respons.send(res.data.data.description)
-    });
-});
-
-//应用版本列表  ok     app: 应用id
-app.get('/applications_versions_list', function(req, respons){
-    sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
-        respons.send(res.data)
-    })
-});
-
-//应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
-app.post('/applications_versions_create', function(req, respons){
-    sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-        respons.send(res.data)
-    })
-});
-
-
-//应用模板列表(应用模板最新版本)  ok      app: 应用id
-app.get('/store_configurations_list', function (req, respons) {
+//应用详情  okokok     app: 应用id
+app.get('/applications_read', function(req, response){
     sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
+        let obj = {};
         let list = [];
         function getLatestVersion(index, item) {
             if (index >= item.length) {
-                respons.send({message: list, status: 'ok'});
+                obj['tempList'] = list;
+                axios.all(
+                    [
+                        http.get(path + '/applications.read?name=' + req.query.app, {headers: req.headers}),
+                        http.get(path + '/applications.versions.list?app=' + req.query.app, {headers: req.headers}),
+                        http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
+                    ]
+                ).then(axios.spread(function (details, versionList, versionLatest) {
+                    obj['data'] = details.data;
+                    obj['versionList'] = versionList.data;
+                    obj['versionLatest'] = versionLatest.data;
+                    response.send({data: obj, ok: true});
+                }));
                 return false;
             } else {
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
@@ -167,15 +120,14 @@ app.get('/store_configurations_list', function (req, respons) {
 // }
 
 //创建新应用   nonono
-app.post('/applications_create', function(req, respons){
+app.post('/applications_create', function(req, response){
     sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
-        respons.send(res.data)
+        response.send(res.data)
     })
 });
 
-
-// 平台事件  列表+总数   ok
-app.get('/platform_activities_lists', function (req, respons) {
+// 平台事件  列表+总数   okokok
+app.get('/platform_activities_lists', function (req, response) {
     let data = {};
     axios({
         url: path + '/'+ req.query.category +'.activities.list',
@@ -191,28 +143,13 @@ app.get('/platform_activities_lists', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            respons.send({data: data, ok: true})
+            response.send({data: data, ok: true})
         })
     })
 });
 
-//确认消息
-app.get('/activities_disponse', function (req, respons) {
-    axios({
-        url: path + '/user.activities.disponse',
-        method: 'GET',
-        data: {
-            name: '9901d9c1fb'
-        },
-        headers: req.headers
-    }).then(res=>{
-        respons.send({data: res.data, ok: true})
-    })
-});
-
-
-//设备事件列表
-app.get('/device_events_list', function (req, respons) {
+//设备事件列表   okokok
+app.get('/device_events_list', function (req, response) {
     let data = {};
     axios({
         url: path + '/'+ req.query.category +'.events.list',
@@ -228,14 +165,77 @@ app.get('/device_events_list', function (req, respons) {
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.events.count?name=' + req.query.name, req.headers).then(res=>{
             data['count'] = res.data.data;
-            respons.send({data: data, ok: true})
+            response.send({data: data, ok: true})
         })
     })
 });
 
+//获取模板版本列表    okokok
+app.get('/configurations_versions_list', function (req, response) {
+    sendGetAjax('/configurations.versions.list', req.headers, req.query).then(res=>{
+        response.send(res.data);
+    }).catch(err=>{
+        console.log('err')
+    })
+});
+
+
+
+///post
+//修改密码   小崔
+app.post('/user_update_password', function (req, response) {
+    console.log(req.body);
+    sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
+        console.log(res.data);
+        response.send(res.data)
+    })
+});
+
+//平台事件确认消息   okokok
+app.post('/activities_dispose', function(req, respones){
+    sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
+        activities: req.body.activities,
+        disposed: req.body.disposed
+    }).then(res=>{
+        respones.send(res.data);
+        console.log(req.body)
+    }).catch(err=>{
+        respones.send({message: 'err', ok: false})
+    })
+});
+//设备事件确认消息 okokok
+app.post('/events_dispose', function(req, respones){
+    sendPostAjax('/'+ req.body.category +'.events.dispose', req.headers, {
+        events: req.body.events,
+        disposed: req.body.disposed
+    }).then(res=>{
+        respones.send(res.data);
+    }).catch(err=>{
+        respones.send({message: 'err', ok: false})
+    })
+});
+
+//创建模板新版本  okokok
+app.post('/configurations_versions_create', function (req, response) {
+    console.log(req.body);
+    sendPostAjax('/configurations.versions.create', req.headers, req.body)
+        .then(res=>{
+            response.send(res.data)
+        })
+});
+
+//应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
+app.post('/applications_versions_create', function(req, response){
+    console.log(req.body);
+    sendPostAjax('/applications.versions.create', req.headers, JSON.stringify(req.body)).then(res=>{
+        response.send(res.data)
+    }).catch(err=>{
+        console.log('err')
+    })
+});
+
+
 module.exports = app;
-
-
 
 //应用   创建、修改、上传新版本
 //消息   列表、查询、详情、确认消息、

@@ -8,7 +8,7 @@ http.get = async (url, option)=>{
             data: option.data || '',
             headers: option.headers || {
                 Accept: 'application/json; charset=utf-8',
-                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+                'Content-Type': 'application/json; charset=utf-8',
                 'dataType': 'json'
             }
         }).then((res)=>{
