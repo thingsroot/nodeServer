@@ -6,33 +6,47 @@ const errMessage = {message: 'error', ok: false};
 const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 const client = require('./redis');
-app.use(function(req, res, next){
-    if (req.method === 'POST'){
-        let str = '';
-        req.on('data',function(data){
-            str += data
-        })
-        req.on('end', function(){
-            if(str){
-                str = JSON.parse(str);
-                req.body = str;
-            }
-            next();
-        })
-    } else {
-        next();
-    }
-})
-
+const bodyParser = require('body-parser')
 app.use(function (req, res, next) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     next();
   });
-// app.use(bodyParser.urlencoded({ extended: false }))
+// app.use(function(req, res, next){
+//     if (req.method === 'POST' && req.headers.accept === 'application/json; charset=utf-8'){
+//         let str = '';
+//         req.on('data',function(data){
+//             str += data
+//         })
+//         req.on('end', function(){
+//             if(str){
+//                 str = JSON.parse(str);
+//                 req.body = str;
+//             }
+//             next();
+//         })
+//     } else if (req.method === 'POST' && req.headers.accept === 'application/x-www-form-urlencoded; charset=utf-8') {
+//         console.log(req)
+//         let str = '';
+//         req.on('data',function(data){
+//             str += data
+//         })
+//         req.on('end', function(){
+//             if(str){
+//                 req.payload = str;
+//             }
+//             console.log(str)
+//             next();
+//         })
+//     } else {
+//         next();
+//     }
+// })
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(server);
-// app.use(bodyParser.json())
 
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
@@ -568,7 +582,10 @@ app.post('/gateways_dev_outputs', function(req, respones){
         console.log(err)
         respones.send(errMessage)
     })
-})
+});
+
+
+
 
 
 app.listen(8881, function(){

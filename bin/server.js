@@ -3,6 +3,10 @@ const app = express();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
+const multipart = require('connect-multiparty'); 
+const fs = require('fs');
+console.log(multipart)
+const multipartMiddleware = multipart();
 const block = {
     display: 'block'
 };
@@ -193,6 +197,7 @@ app.post('/user_update_password', function (req, response) {
 
 //平台事件确认消息   okokok
 app.post('/activities_dispose', function(req, respones){
+    console.log(req.body)
     sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
@@ -225,13 +230,20 @@ app.post('/configurations_versions_create', function (req, response) {
 });
 
 //应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
-app.post('/applications_versions_create', function(req, response){
-    console.log(req.body);
-    sendPostAjax('/applications.versions.create', req.headers, JSON.stringify(req.body)).then(res=>{
-        response.send(res.data)
-    }).catch(err=>{
-        console.log('err')
+app.post('/applications_versions_create', multipartMiddleware, function(req, response){
+    console.log(req);
+    fs.readFile(req.files.files[0].path, function(err, result){
+        console.log(result.toString())
+        // console.log(Buffer.concat(result))
+        req.body.app_file = result.toString();
+        sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
+            console.log(res)
+            response.send(res.data)
+        }).catch(err=>{
+            console.log('err')
+        })
     })
+    
 });
 
 
