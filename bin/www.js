@@ -137,7 +137,7 @@ app.get('/user_token_read', function(req, respones){
     sendGetAjax('/user.token.read', req.headers).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        console.log(err);
         respones.send(errMessage)
     })
 })

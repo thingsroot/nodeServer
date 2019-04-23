@@ -68,14 +68,13 @@ app.get('/applications_list', function(req, response){
     })
 });
 
-//应用详情  okokok     app: 应用id
+// 应用详情  okokok     app: 应用id  user:  用户id
 app.get('/applications_read', function(req, response){
     sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
         let obj = {};
         let list = [];
         function getLatestVersion(index, item) {
             if (index >= item.length) {
-                obj['tempList'] = list;
                 axios.all(
                     [
                         http.get(path + '/applications.read?name=' + req.query.app, {headers: req.headers}),
@@ -83,6 +82,7 @@ app.get('/applications_read', function(req, response){
                         http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
                     ]
                 ).then(axios.spread(function (details, versionList, versionLatest) {
+
                     obj['data'] = details.data;
                     obj['versionList'] = versionList.data;
                     obj['versionLatest'] = versionLatest.data;
@@ -95,6 +95,7 @@ app.get('/applications_read', function(req, response){
                         if (v.name === item[index]) {
                             v['latest_version'] = res.data.data;
                         }
+
                     });
                     getLatestVersion(index + 1, item, req.headers)
                 })
@@ -109,26 +110,74 @@ app.get('/applications_read', function(req, response){
     })
 });
 
+//单个APP详情
+app.get('/applications_details', function (req, response) {
+    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
+        response.send(res.data)
+    })
+})
+
+
+//我的应用下对应的模板列表   okokok
+app.get('/user_configuration_list', function(req, response){
+    sendGetAjax('/configurations.list?conf_type=Configuration', req.headers).then(res=>{
+        let obj = [];
+        let list = [];
+        let app = req.query.app;
+        function getLatestVersion(index, item) {
+            if (index >= item.length) {
+                obj = list;
+                response.send({message: list, ok: true})
+            } else {
+                sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
+                    list && list.length > 0 && list.map((v)=>{
+                        if (v.name === item[index]) {
+                            v['latest_version'] = res.data.data;
+                        }
+
+                    });
+                    getLatestVersion(index + 1, item, req.headers)
+                })
+            }
+        }
+        let data = res.data.data;
+        data && data.length > 0 && data.map((v)=>{
+            if (v.app === app) {
+               list.push(v)
+            }
+        });
+        let arr = [];
+        list && list.length > 0 && list.map((v)=>{
+            arr.push(v.name);
+        });
+        getLatestVersion(0, arr);
+    })
+});
+
 // {
 //     "app_name": "string",     应用名称
 //     "code_name": "string",    文件名
 //     "has_conf_template": 0,   是否有配置模板
 //     "license_type": "Open",   授权类型
-//     "star": 0,                评星
 //     "description": "string",  描述
 //     "conf_template": "string",
 //     "pre_configuration": "string",    配置模板
-//     "keywords": [
-//          "string"
-//      ]
 // }
 
-//创建新应用   nonono
+//创建新应用   okokok
 app.post('/applications_create', function(req, response){
     sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
         response.send(res.data)
     })
 });
+
+//修改应用
+app.post('/applications_update', function(req, response){
+    sendPostAjax('/applications.update', req.headers, req.body).then(res=>{
+        response.send(res.data)
+    })
+});
+
 
 // 平台事件  列表+总数   okokok
 app.get('/platform_activities_lists', function (req, response) {
@@ -174,7 +223,7 @@ app.get('/device_events_list', function (req, response) {
     })
 });
 
-//获取模板版本列表    okokok
+//获取模板版本列表    okokok   conf:  模板id
 app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query).then(res=>{
         response.send(res.data);
@@ -183,7 +232,25 @@ app.get('/configurations_versions_list', function (req, response) {
     })
 });
 
-
+//获取某个模板指定版本下的数据    conf: 模板id   version： 指定版本号
+app.get('/configurations_version_read', function (req, response) {
+    sendGetAjax('/configurations.versions.list?conf=' + req.query.conf, req.headers).then(res=>{
+        let list = res.data.data;
+        let data = [];
+        list && list.length > 0 && list.map((v)=>{
+            if (v.version.toString() === req.query.version) {
+                console.log('--------------')
+                console.log(v);
+                data.push(v)
+            } else {
+                console.log('no')
+            }
+        });
+        response.send({message: data, ok: true})
+    }).catch(err=>{
+        console.log('err')
+    })
+});
 
 ///post
 //修改密码   小崔
@@ -233,17 +300,64 @@ app.post('/configurations_versions_create', function (req, response) {
 app.post('/applications_versions_create', multipartMiddleware, function(req, response){
     console.log(req);
     fs.readFile(req.files.files[0].path, function(err, result){
-        console.log(result.toString())
+        console.log(result.toString());
         // console.log(Buffer.concat(result))
         req.body.app_file = result.toString();
         sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-            console.log(res)
+            console.log(res);
             response.send(res.data)
         }).catch(err=>{
             console.log('err')
         })
     })
-    
+});
+
+//创建应用配置     ok
+// {
+//     "app": "string",   应用id
+//     "conf_name": "string",   模板名称
+//     "description": "string",   描述
+//     "type": "Configuration",   类型
+//     "public": 0,     是否公开  0不公开  1公开
+//     "owner_type": "User",
+//     "owner_id": "string"
+// }
+app.post('/configurations_create', multipartMiddleware, function(req, response){
+    console.log(req);
+    sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
+        console.log(res);
+        response.send(res.data)
+    }).catch(err=>{
+        console.log('err')
+    })
+});
+
+//删除模板   okokok
+app.post('/configurations_remove', function(req, respones){
+    sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        console.log(err);
+        respones.send(errMessage)
+    })
+});
+
+//读取模板信息
+app.get('/configurations_read', function (req, response) {
+    sendGetAjax('/configurations.read', req.headers, req.query).then(res=>{
+        response.send(res.data)
+    }).catch(err=>{
+        response.send('err')
+    })
+});
+
+//查询是否是开发者
+app.get('/developers_read', function (req, response) {
+    sendGetAjax('/developers.read', req.headers, req.query).then(res=>{
+        response.send(res.data)
+    }).catch(err=>{
+        response.send('err')
+    })
 });
 
 
