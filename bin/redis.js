@@ -70,4 +70,15 @@ client.getMeta = (sn)=>{
         })
     })
 }
+client.getInfluxDB = (sn)=>{
+    client.select(8);
+    return new Promise((resolve, reject)=>{
+        client.get(sn, function(err, result){
+            if (err){
+                reject(err)
+            }
+            resolve(result)
+        })
+    })
+}
 module.exports = client;

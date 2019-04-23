@@ -3,10 +3,14 @@ const app = express();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
-const multipart = require('connect-multiparty'); 
-const fs = require('fs');
-console.log(multipart)
-const multipartMiddleware = multipart();
+
+var proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
+var options = {
+    target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
+    changeOrigin: true,               // needed for virtual hosted sites
+};
+var exampleProxy = proxy_middle('/applications_versions_create', options);
+app.use(exampleProxy);
 const block = {
     display: 'block'
 };
@@ -222,28 +226,11 @@ app.post('/events_dispose', function(req, respones){
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    console.log(req.body);
+    console.log(req.body.toString());
     sendPostAjax('/configurations.versions.create', req.headers, req.body)
         .then(res=>{
             response.send(res.data)
         })
-});
-
-//应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
-app.post('/applications_versions_create', multipartMiddleware, function(req, response){
-    console.log(req);
-    fs.readFile(req.files.files[0].path, function(err, result){
-        console.log(result.toString())
-        // console.log(Buffer.concat(result))
-        req.body.app_file = result.toString();
-        sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-            console.log(res)
-            response.send(res.data)
-        }).catch(err=>{
-            console.log('err')
-        })
-    })
-    
 });
 
 
