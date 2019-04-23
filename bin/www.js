@@ -7,6 +7,8 @@ const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 const client = require('./redis');
 const bodyParser = require('body-parser')
+const InfluxClient = require('./influx');
+
 app.use(function (req, res, next) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -43,11 +45,11 @@ app.use(function (req, res, next) {
 //         next();
 //     }
 // })
-
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(server);
 
+
+app.use(server);
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = '';
@@ -144,8 +146,9 @@ app.get('/user_token_read', function(req, respones){
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
     const arr = [];
-    function getGatewaysList (index, item, headers){
+    function getGatewaysList (index, item){
         if (index >= item.length){
+            console.log(arr)
             respons.send({message: arr, status: 'OK'})
         }
         axios.all(
@@ -157,7 +160,7 @@ app.get('/gateways_list', function(req, respons){
         ).then(axios.spread(function (acct, perms, devices) {
             arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
             if(index < item.length){
-                getGatewaysList(index + 1, item, req.headers)
+                getGatewaysList(index + 1, item)
             }
         }));
     }
@@ -166,7 +169,15 @@ app.get('/gateways_list', function(req, respons){
         method: 'GET',
         headers: req.headers
     }).then(res=>{
-        const data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices)
+        let data = [];
+        if (res.data.data.company_devices && res.data.data.company_devices.length > 0) {
+            data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices)
+        } else {
+            data = res.data.data.company_devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices)
+        }
+        
+        console.log(data)
+        console.log('2222')
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
@@ -251,8 +262,6 @@ app.get('/gateways_app_list', function(req, respones){
         })
     }
     getDevList().then(DevList=>{
-        console.log(DevList)
-
         function getAppList(index, item){
             if(index >= item.length){
                 const obj = {};
@@ -267,9 +276,7 @@ app.get('/gateways_app_list', function(req, respones){
                     //     console.log(item.meta, '-----', value)
                     // })
                 })
-                console.log(obj);
                 arr.map((item, key)=>{
-                    console.log(item)
                     item.devs_len = obj[item.device_name]
                     if (!item.devs_len){
                         item.devs_len = 0;
@@ -349,6 +356,51 @@ app.get('/gateways_dev_len', function(req, respones){
         respones.send(err)
     })
 })
+// 获取网关采集设备中的实时数据
+app.get('/gateways_dev_data', function(req, respones){
+    sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send(errMessage)
+    })
+})
+// 获取网关历史数据
+app.get('/gateways_historical_data', function(req, respones){
+    console.log(req.query)
+    const obj = req.query;
+    client.getInfluxDB(obj.sn).then(index=>{
+        // InfluxClient.queryCount('telegraf', 'cpu', 'time > now() - 5m group by time(10s) fill(none)', 'raw=value_method', function(result){
+        //     console.log(result)
+        // })
+        console.log(new Date() * 1 , '---' , obj._)
+        let count = '';
+        if (obj.vt === 'float') {
+            count = 'value=' + obj.value_method
+        } else if(obj.vt === 'int') {
+            count = 'int_value=' + obj.value_method
+        } else {
+            count = 'string_value=' + obj.value_method
+        }
+        InfluxClient.queryCount(index, obj.tag, obj.time_condition +' group by time(' + obj.group_time_span + ') fill(null)', count, function(result){
+            console.log(result)
+            const arr = result.results[0].series ? result.results[0].series[0].values : [];
+            const data = [];
+            arr.map(item=>{
+                data.push({
+                    name: obj.tag,
+                    quality: 0,
+                    time: item[0],
+                    value: item[1] !== null ? item[1].toFixed(2) : '0',
+                    vsn: obj.sn
+                })
+            })
+            respones.send({message: data})
+        })
+        
+    })
+})
+
+
 // 刷新网关应用列表
 app.post('/gateways_applications_refresh', function(req, respones){
     sendPostAjax('/gateways.applications.refresh', req.headers, req.body).then(res=>{
@@ -368,6 +420,17 @@ app.post('/gateways_enable_log', function(req, respones){
 })
 // 获取网关设备列表
 app.get('/gateways_dev_list', function(req, respones){
+
+    const Influx = require('influxdb-nodejs');
+    const client = new Influx('http://root:root@172.30.0.187:8086/dongsun.com');
+    client.query('app_run_ioe_frpc')
+        .where('int_value', 'mean_int_value')
+        //.where('mean_quality', 'value')
+        .then(function(err, result){
+            console.log(err, result)
+        })
+    
+
     const arr = [];
     function getDevicesList (index, item){
         if (index >= item.length){
@@ -375,7 +438,6 @@ app.get('/gateways_dev_list', function(req, respones){
             return false;
         } else {
             http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
-                console.log(res)
                 const data = res.data.data;
                 data.meta.sn = item[index];
                 arr.push(data);

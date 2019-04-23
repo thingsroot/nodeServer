@@ -3,10 +3,14 @@ const app = express();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
-const multipart = require('connect-multiparty'); 
-const fs = require('fs');
-console.log(multipart)
-const multipartMiddleware = multipart();
+
+var proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
+var options = {
+    target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
+    changeOrigin: true,               // needed for virtual hosted sites
+};
+var exampleProxy = proxy_middle('/applications_versions_create', options);
+app.use(exampleProxy);
 const block = {
     display: 'block'
 };
@@ -289,7 +293,7 @@ app.post('/events_dispose', function(req, respones){
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    console.log(req.body);
+    console.log(req.body.toString());
     sendPostAjax('/configurations.versions.create', req.headers, req.body)
         .then(res=>{
             response.send(res.data)
@@ -359,7 +363,6 @@ app.get('/developers_read', function (req, response) {
         response.send('err')
     })
 });
-
 
 module.exports = app;
 
