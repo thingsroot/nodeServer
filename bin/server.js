@@ -58,9 +58,9 @@ function sendPostAjax (url, headers, query){
 
 //个人信息   ok
 app.get('/user_read', function (req, response) {
-    console.log(req.query);
+    // console.log(req.query);
     sendGetAjax('/user.read', req.headers, req.query).then(res=>{
-        console.log(res.data);
+        // console.log(res.data);
         response.send(res.data)
     })
 });
@@ -232,7 +232,7 @@ app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query).then(res=>{
         response.send(res.data);
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
@@ -243,38 +243,38 @@ app.get('/configurations_version_read', function (req, response) {
         let data = [];
         list && list.length > 0 && list.map((v)=>{
             if (v.version.toString() === req.query.version) {
-                console.log('--------------')
-                console.log(v);
+                // console.log('--------------')
+                // console.log(v);
                 data.push(v)
             } else {
-                console.log('no')
+                // console.log('no')
             }
         });
         response.send({message: data, ok: true})
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
 ///post
 //修改密码   小崔
 app.post('/user_update_password', function (req, response) {
-    console.log(req.body);
+    // console.log(req.body);
     sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
-        console.log(res.data);
+        // console.log(res.data);
         response.send(res.data)
     })
 });
 
 //平台事件确认消息   okokok
 app.post('/activities_dispose', function(req, respones){
-    console.log(req.body)
+    // console.log(req.body)
     sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
     }).then(res=>{
         respones.send(res.data);
-        console.log(req.body)
+        // console.log(req.body)
     }).catch(err=>{
         respones.send({message: 'err', ok: false})
     })
@@ -293,27 +293,11 @@ app.post('/events_dispose', function(req, respones){
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    console.log(req.body.toString());
+    // console.log(req.body.toString());
     sendPostAjax('/configurations.versions.create', req.headers, req.body)
         .then(res=>{
             response.send(res.data)
         })
-});
-
-//应用创建新版本         app  version  comment  app_file     未成功  req.query为undefined
-app.post('/applications_versions_create', multipartMiddleware, function(req, response){
-    console.log(req);
-    fs.readFile(req.files.files[0].path, function(err, result){
-        console.log(result.toString());
-        // console.log(Buffer.concat(result))
-        req.body.app_file = result.toString();
-        sendPostAjax('/applications.versions.create', req.headers, req.body).then(res=>{
-            console.log(res);
-            response.send(res.data)
-        }).catch(err=>{
-            console.log('err')
-        })
-    })
 });
 
 //创建应用配置     ok
@@ -326,13 +310,13 @@ app.post('/applications_versions_create', multipartMiddleware, function(req, res
 //     "owner_type": "User",
 //     "owner_id": "string"
 // }
-app.post('/configurations_create', multipartMiddleware, function(req, response){
-    console.log(req);
+app.post('/configurations_create', function(req, response){
+    // console.log(req);
     sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
-        console.log(res);
+        // console.log(res);
         response.send(res.data)
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
@@ -341,7 +325,7 @@ app.post('/configurations_remove', function(req, respones){
     sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err);
+        // console.log(err);
         respones.send(errMessage)
     })
 });
