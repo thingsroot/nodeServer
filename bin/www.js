@@ -145,27 +145,16 @@ app.get('/gateways_list', function(req, respons){
         const company_devices = res.data.data.company_devices;
         const shared_devices = res.data.data.shared_devices;
         const private_devices = res.data.data.private_devices;
+        console.log(company_devices)
         if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
             data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
-        } else if (company_devices && company_devices.length > 0 && !shared_devices || shared_devices.length <= 0) {
-            data = data = company_devices[0].devices.concat(private_devices)
-        } else if (shared_devices && shared_devices.length > 0 && !company_devices && company_devices.length <= 0) {
-            data = data = shared_devices[0].devices.concat(private_devices)
+        } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
+            data = company_devices[0].devices.concat(private_devices)
+        } else if (shared_devices && shared_devices.length > 0 && company_devices.length <= 0) {
+            data = shared_devices[0].devices.concat(private_devices)
         } else {
             data = private_devices
         }
-
-        // if (res.data.data.company_devices && res.data.data.company_devices.length > 0 && res.data.data.shared_devices && res.data.data.shared_devices.length > 0) {
-        //     data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices[0].devices)
-        // } else if(res.data.data.company_devices && res.data.data.company_devices.length > 0 && res.data.data.private_devices && res.data.data.shared_devices && res.data.data.shared_devices.length <= 0) {
-        //     data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices)
-        // } else if(res.data.data.shared_devices && res.data.data.shared_devices.length > 0 && !res.data.data.company_devices || res.data.data.company_devices.length <= 0 && ) {
-        //     data = res.data.data.shared_devices[0].devices.concat(res.data.data.private_devices)
-        // } else {
-        //     data = res.data.data.private_devices;
-        // }
-        
-        // console.log(data, 'data')
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
