@@ -385,7 +385,7 @@ app.get('/gateways_historical_data', function(req, respones){
         } else {
             count = 'string_value=' + obj.value_method
         }
-        InfluxClient.queryCount(index, obj.tag, obj.time_condition +' group by time(' + obj.group_time_span + ') fill(null)', count, function(result){
+        InfluxClient.queryCount(index, obj.tag, obj.time_condition +' group by time(' + obj.group_time_span + ') fill(null) limit 200', count, function(result){
             // console.log(result)
             const arr = result.results[0].series ? result.results[0].series[0].values : [];
             const data = [];

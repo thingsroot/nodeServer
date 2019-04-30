@@ -44,7 +44,6 @@ InfluxClient.query = function(table, condition, set, callback) {
 };
 
 InfluxClient.queryCount = function(database, table, condition, count, callback) {
-    
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     // console.log("#     dblink:" + dblink);
     var client = new Influx(dblink);
@@ -55,7 +54,7 @@ InfluxClient.queryCount = function(database, table, condition, count, callback) 
     // console.log(countArr)
     for (var i = 0; i <= countArr.length - 1; i++) {
         // console.log(countArr[i].split('='))
-        reader = reader.addFunction('mean', countArr[i].split('=')[0], {
+        reader = reader.addFunction(countArr[i].split('=')[1] === 'raw' ? 'mean' : countArr[i].split('=')[1], countArr[i].split('=')[0], {
             alias: countArr[i].split('=')[1],
         });
         // console.log(reader)
