@@ -204,6 +204,14 @@ app.post('/gateways_create', function(req, respones){
         respones.send(errMessage)
     })
 })
+
+app.get('/gateways_applications_list', function (req, response) {
+    console.log(req.query)
+    sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
+        response.send(res.data)
+    })
+})
+
 // 获取网关信息
 app.get('/gateways_read', function(req, respones){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
@@ -509,17 +517,22 @@ app.post('/gateways_remove', function(req, respones){
 //获取APP列表 未作处理 未测试
 app.get('/store_list', function(req, respones){
     sendGetAjax('/store.list', req.headers).then(res=>{
+    // sendGetAjax('/applications.list', req.headers).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         respones.send(err.data)
     })
 })
-// 安装APP 未作处理 未测试
-app.post('/gateways_applications_install', function(req, respones){
-    sendPostAjax('/gateways.applications.install', req.headers, req.body).then(res=>{
-        respones.send(res.data)
-    }).catch(err=>{
-        respones.send(err)
+// 安装APP okokok
+app.post('/gateways_applications_install', function(req, response){
+    console.log(req.body);
+    axios({
+        url: path + '/gateways.applications.install',
+        method: 'POST',
+        data: req.body,
+        headers: req.headers
+    }).then(res=>{
+        response.send({data: res.data, ok: true})
     })
 })
 app.post('/gateways_applications_remove', function(req, respones){
