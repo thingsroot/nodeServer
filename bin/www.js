@@ -15,36 +15,7 @@ app.use(function (req, res, next) {
     res.setHeader('Expires', '0');
     next();
   });
-// app.use(function(req, res, next){
-//     if (req.method === 'POST' && req.headers.accept === 'application/json; charset=utf-8'){
-//         let str = '';
-//         req.on('data',function(data){
-//             str += data
-//         })
-//         req.on('end', function(){
-//             if(str){
-//                 str = JSON.parse(str);
-//                 req.body = str;
-//             }
-//             next();
-//         })
-//     } else if (req.method === 'POST' && req.headers.accept === 'application/x-www-form-urlencoded; charset=utf-8') {
-//         console.log(req)
-//         let str = '';
-//         req.on('data',function(data){
-//             str += data
-//         })
-//         req.on('end', function(){
-//             if(str){
-//                 req.payload = str;
-//             }
-//             console.log(str)
-//             next();
-//         })
-//     } else {
-//         next();
-//     }
-// })
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -68,7 +39,7 @@ function sendGetAjax (url, headers, query){
         pathname = path + url;
     }
     
-    console.log(pathname)
+    // console.log(pathname)
     return new Promise((resolve, reject)=>{
         http.get(pathname, {
             headers
@@ -95,9 +66,9 @@ function sendPostAjax (url, headers, body){
 
 // 转接login 未作处理
 app.post('/user_login', function(req, respons){
-    console.log(req.body)
+    // console.log(req.body)
      sendPostAjax('/user.login', undefined, req.body).then(res=>{
-         console.log(res)
+        //  console.log(res)
         const data = {
             data: res.data,
             status: res.status,
@@ -111,15 +82,16 @@ app.post('/user_login', function(req, respons){
 })
 // 注册账户 未作处理
 app.post('/user_create', function(req, respons){
-    sendPostAjax('/user.create', req.headers, req.query).then(res=>{
+    sendPostAjax('/user.create', req.headers, req.body).then(res=>{
         respons.send(res.data)
     }).catch(err=>{
-        respons.send(err)
+        console.log(err)
+        respons.send(errMessage)
     })
 })
 // 忘记密码 未做处理
 app.post('/user_reset_password', function(req, respons){
-    sendPostAjax('/user.reset_password', req.headers, req.query).then(res=>{
+    sendPostAjax('/user.reset_password', req.headers, req.body).then(res=>{
         respons.send(res.data)
     }).catch(err=>{
         respons.send(err)
@@ -128,9 +100,9 @@ app.post('/user_reset_password', function(req, respons){
 
 // 重新获取csrftoken
 app.get('/user_csrf_token', function(req, respones){
-    console.log(req)
+    // console.log(req)
     sendGetAjax('/user.csrf_token', req.headers).then(res=>{
-        console.log(res)
+        // console.log(res)
         respones.send(res.data);
     })
 })
@@ -139,7 +111,7 @@ app.get('/user_token_read', function(req, respones){
     sendGetAjax('/user.token.read', req.headers).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err);
+        // console.log(err);
         respones.send(errMessage)
     })
 })
@@ -148,8 +120,8 @@ app.get('/gateways_list', function(req, respons){
     const arr = [];
     function getGatewaysList (index, item){
         if (index >= item.length){
-            console.log(arr)
             respons.send({message: arr, status: 'OK'})
+            return false;
         }
         axios.all(
             [
@@ -170,14 +142,30 @@ app.get('/gateways_list', function(req, respons){
         headers: req.headers
     }).then(res=>{
         let data = [];
-        if (res.data.data.company_devices && res.data.data.company_devices.length > 0) {
-            data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices)
+        const company_devices = res.data.data.company_devices;
+        const shared_devices = res.data.data.shared_devices;
+        const private_devices = res.data.data.private_devices;
+        if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
+            data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
+        } else if (company_devices && company_devices.length > 0 && !shared_devices || shared_devices.length <= 0) {
+            data = data = company_devices[0].devices.concat(private_devices)
+        } else if (shared_devices && shared_devices.length > 0 && !company_devices && company_devices.length <= 0) {
+            data = data = shared_devices[0].devices.concat(private_devices)
         } else {
-            data = res.data.data.company_devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices)
+            data = private_devices
         }
+
+        // if (res.data.data.company_devices && res.data.data.company_devices.length > 0 && res.data.data.shared_devices && res.data.data.shared_devices.length > 0) {
+        //     data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices).concat(res.data.data.shared_devices[0].devices)
+        // } else if(res.data.data.company_devices && res.data.data.company_devices.length > 0 && res.data.data.private_devices && res.data.data.shared_devices && res.data.data.shared_devices.length <= 0) {
+        //     data = res.data.data.company_devices[0].devices.concat(res.data.data.private_devices)
+        // } else if(res.data.data.shared_devices && res.data.data.shared_devices.length > 0 && !res.data.data.company_devices || res.data.data.company_devices.length <= 0 && ) {
+        //     data = res.data.data.shared_devices[0].devices.concat(res.data.data.private_devices)
+        // } else {
+        //     data = res.data.data.private_devices;
+        // }
         
-        console.log(data)
-        console.log('2222')
+        // console.log(data, 'data')
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
@@ -185,12 +173,12 @@ app.get('/gateways_list', function(req, respons){
 })
 // 删除设备安装应用
 app.post('/applications_remove', function(req, respones){
-    console.log(req)
+    // console.log(req)
     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
-        console.log(res);
+        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -218,7 +206,7 @@ app.get('/gateways_read', function(req, respones){
         client.getStatus(req.query.name).then(result=>{
             client.getNetManager(req.query.name).then(data=>{
                 const newData = Object.values(data);
-                console.log(newData)
+                // console.log(newData)
                 result.Net_Manager = false;
                 result.p2p_vpn = false;
                 res.data.data.use_beta = res.data.data.use_beta ? Boolean(res.data.data.use_beta) : false;
@@ -233,7 +221,7 @@ app.get('/gateways_read', function(req, respones){
                         result.p2p_vpn = true;
                     }
                 });
-                console.log(result)
+                // console.log(result)
                 const Obj = Object.assign(result, res.data.data);
                 respones.send(Obj)
             })
@@ -279,9 +267,9 @@ app.get('/gateways_app_list', function(req, respones){
                     } else {
                         obj[item.meta.app_inst]++;
                     }
-                   // console.log(item.meta, key)
+                //    console.log(item.meta, key)
                     // arr.map((value, index)=>{
-                    //     console.log(item.meta, '-----', value)
+                        // console.log(item.meta, '-----', value)
                     // })
                 })
                 arr.map((item, key)=>{
@@ -316,7 +304,7 @@ app.get('/gateways_app_list', function(req, respones){
             const data = res.data.data;
             const keys = Object.keys(data)
             const values = Object.values(data)
-            console.log(values)
+            // console.log(values)
             values.map((item, key)=>{
               if (item.running){
                   item.status = 'running';
@@ -341,16 +329,32 @@ app.get('/gateways_app_list', function(req, respones){
 // 网关应用开启
 app.post('/gateways_applications_start', function(req, respones){
     sendPostAjax('/gateways.applications.start', req.headers, req.body).then(res=>{
-        console.log(res)
+        // console.log(res)
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
 // 网关应用关闭
 app.post('/gateways_applications_stop', function(req, respones){
     sendPostAjax('/gateways.applications.stop', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send(errMessage)
+    })
+})
+// 查詢應用版本列表
+app.get('/applications_versions_list', function(req, respones){
+    sendGetAjax('/applications.versions.list?app=FreeIOE', req.headers).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send(errMessage)
+    })
+})
+// 查詢應用最新版本
+app.get('/applications_versions_latest', function(req, respones){
+    sendGetAjax('/applications.versions.latest?beta=1&app=FreeIOE', req.headers).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -374,13 +378,13 @@ app.get('/gateways_dev_data', function(req, respones){
 })
 // 获取网关历史数据
 app.get('/gateways_historical_data', function(req, respones){
-    console.log(req.query)
+    // console.log(req.query)
     const obj = req.query;
     client.getInfluxDB(obj.sn).then(index=>{
         // InfluxClient.queryCount('telegraf', 'cpu', 'time > now() - 5m group by time(10s) fill(none)', 'raw=value_method', function(result){
-        //     console.log(result)
+            // console.log(result)
         // })
-        console.log(new Date() * 1 , '---' , obj._)
+        // console.log(new Date() * 1 , '---' , obj._)
         let count = '';
         if (obj.vt === 'float') {
             count = 'value=' + obj.value_method
@@ -390,7 +394,7 @@ app.get('/gateways_historical_data', function(req, respones){
             count = 'string_value=' + obj.value_method
         }
         InfluxClient.queryCount(index, obj.tag, obj.time_condition +' group by time(' + obj.group_time_span + ') fill(null)', count, function(result){
-            console.log(result)
+            // console.log(result)
             const arr = result.results[0].series ? result.results[0].series[0].values : [];
             const data = [];
             arr.map(item=>{
@@ -398,7 +402,7 @@ app.get('/gateways_historical_data', function(req, respones){
                     name: obj.tag,
                     quality: 0,
                     time: item[0],
-                    value: item[1] !== null ? item[1].toFixed(2) : '0',
+                    value: item[1] !== null ? item[1].toFixed(2) : 0,
                     vsn: obj.sn
                 })
             })
@@ -412,7 +416,7 @@ app.get('/gateways_historical_data', function(req, respones){
 // 刷新网关应用列表
 app.post('/gateways_applications_refresh', function(req, respones){
     sendPostAjax('/gateways.applications.refresh', req.headers, req.body).then(res=>{
-        console.log(res);
+        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -435,7 +439,7 @@ app.get('/gateways_dev_list', function(req, respones){
         .where('int_value', 'mean_int_value')
         //.where('mean_quality', 'value')
         .then(function(err, result){
-            console.log(err, result)
+            // console.log(err, result)
         })
     
 
@@ -471,27 +475,28 @@ app.post('/gateways_data_enable', function(req, respones){
     sendPostAjax('/gateways.enable_data', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, respones){
-    console.log(req)
+    // console.log(req)
     sendPostAjax('/gateways.beta.enable', req.headers, req.body).then(res=>{
         respones.send(res.data)
-        console.log(res);
+        // console.log(res);
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
+// 網關應用升級
 app.post('/gateways_applications_upgrade', function(req, respones){
     sendPostAjax('/gateways.applications.upgrade', req.headers, req.body).then(res=>{
-        console.log(res.data)
+        // console.log(res.data)
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -499,9 +504,9 @@ app.post('/gateways_applications_upgrade', function(req, respones){
 app.post('/gateways_beta_disable', function(req, respones){
     sendPostAjax('/gateways.beta.disable', req.headers, req.body).then(res=>{
         respones.send(res.data)
-        console.log(res);
+        // console.log(res);
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -510,7 +515,7 @@ app.post('/gateways_remove', function(req, respones){
     sendPostAjax('/gateways.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -539,7 +544,7 @@ app.post('/gateways_applications_remove', function(req, respones){
     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)    
     })
 })
@@ -556,17 +561,17 @@ app.post('/gateways_applications_option', function(req, respones){
 //     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
 //         respones.send(res.data)
 //     }).catch(err=>{
-//         console.log(err)
+        //console.log(err)
 //         respones.send(err)
 //     })
 // })
 // 网关操作指令结果查询  接口API没写对 传递参数是id
 app.get('/gateways_exec_result', function(req, respones){
     sendGetAjax('/gateways.exec_result', req.headers, req.query).then(res=>{
-        console.log(res);
+        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -591,7 +596,7 @@ app.post('/gateways_info', function(req, respones){
 // 获取  未处理 未测试
 app.get('/gateway_devf_data', function(req, respones){
     sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
-        console.log(res);
+        // console.log(res);
         res.data && res.data.length > 0 && res.data.map((item)=>{
                     if (!item.vt){
                         item.vt = 'float'
@@ -602,7 +607,7 @@ app.get('/gateway_devf_data', function(req, respones){
 })
 app.get('/store_read', function(req, respones){
     sendGetAjax('/store.read', req.headers, req.query).then(res=>{
-        console.log(res)
+        // console.log(res)
         respones.send(res.data)
     })
 })
@@ -651,10 +656,10 @@ app.post('/gateways_restart', function(req, respones){
 
 app.post('/gateways_dev_outputs', function(req, respones){
     sendPostAjax('/gateways.devices.output', req.headers, req.body).then(res=>{
-        console.log(res)
+        // console.log(res)
         respones.send(res.data);
     }).catch(err=>{
-        console.log(err)
+        // console.log(err)
         respones.send(errMessage)
     })
 });

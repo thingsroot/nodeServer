@@ -34,7 +34,7 @@ client.getStatus = (sn)=>{
     // return obj;
 }
 client.getDevLen = (sn)=>{
-    console.log(sn)
+    // console.log(sn)
     client.select(11);
     return new Promise((resolve, reject)=>{
         let length = 0;
@@ -43,7 +43,7 @@ client.getDevLen = (sn)=>{
                 reject(err)
             }
             // length = JSON.parse(result).length;
-            console.log(result)
+            // console.log(result)
             resolve(result)
         })
     })
@@ -66,7 +66,7 @@ client.getMeta = (sn)=>{
             if (err){
                 reject(err)
             }
-            console.log(JSON.parse(result))
+            // console.log(JSON.parse(result))
         })
     })
 }

@@ -71,6 +71,7 @@ app.get('/user_read', function (req, response) {
 
 app.get('/user_groups_list', function (req, response) {
     sendGetAjax('/user.groups.list', req.headers).then(res=>{
+    // console.log(req.query);
         response.send(res.data)
     })
 });
@@ -297,7 +298,7 @@ app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query).then(res=>{
         response.send(res.data);
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
@@ -313,7 +314,7 @@ app.get('/configurations_version_read', function (req, response) {
         });
         response.send({message: data, ok: true})
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
@@ -370,7 +371,7 @@ app.post('/configurations_create', function(req, response){
     sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
         response.send(res.data)
     }).catch(err=>{
-        console.log('err')
+        // console.log('err')
     })
 });
 
@@ -379,7 +380,7 @@ app.post('/configurations_remove', function(req, respones){
     sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        console.log('err');
+        respones.send(errMessage)
     })
 });
 
