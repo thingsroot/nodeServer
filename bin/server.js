@@ -9,8 +9,14 @@ var options = {
     target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
+var option = {
+    target: 'http://ioe.thingsroot.com/api/v1/applications.icon', // target host
+    changeOrigin: true,               // needed for virtual hosted sites
+};
 var exampleProxy = proxy_middle('/applications_versions_create', options);
+var example = proxy_middle('/applications_icon', option);
 app.use(exampleProxy);
+app.use(example);
 const block = {
     display: 'block'
 };
@@ -58,9 +64,14 @@ function sendPostAjax (url, headers, query){
 
 //个人信息   ok
 app.get('/user_read', function (req, response) {
-    // console.log(req.query);
     sendGetAjax('/user.read', req.headers, req.query).then(res=>{
-        // console.log(res.data);
+        response.send(res.data)
+    })
+});
+
+app.get('/user_groups_list', function (req, response) {
+    sendGetAjax('/user.groups.list', req.headers).then(res=>{
+    // console.log(req.query);
         response.send(res.data)
     })
 });
@@ -99,7 +110,6 @@ app.get('/applications_read', function(req, response){
                         if (v.name === item[index]) {
                             v['latest_version'] = res.data.data;
                         }
-
                     });
                     getLatestVersion(index + 1, item, req.headers)
                 })
@@ -114,13 +124,55 @@ app.get('/applications_read', function(req, response){
     })
 });
 
+app.get('/application_configurations_list',function (req, response) {
+    sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
+        let list = [];
+        function getLatestVersion(index, item) {
+            if (index >= item.length) {
+                response.send({data: list, ok: true});
+                return false;
+            } else {
+                sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
+                    list && list.length > 0 && list.map((v)=>{
+                        if (v.name === item[index]) {
+                            v['templateList'] = res.data.data;
+                        }
+                    });
+                    getLatestVersion(index + 1, item, req.headers)
+                })
+            }
+        }
+        list = res.data.data;
+        console.log(res.data);
+        let arr = [];
+        list && list.length > 0 && list.map((v)=>{
+            arr.push(v.name);
+        });
+        getLatestVersion(0, arr);
+    })
+});
+
+app.get('/applications_versions_latest', function (req, response) {
+    sendGetAjax('/applications.versions.latest', req.headers, req.query).then(res=>{
+        response.send(res.data);
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+});
+
+//刷新应用版本列表
+app.get('/versions_list', function (req, response) {
+    sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
+        response.send(res.data);
+    })
+});
+
 //单个APP详情
 app.get('/applications_details', function (req, response) {
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
         response.send(res.data)
     })
-})
-
+});
 
 //我的应用下对应的模板列表   okokok
 app.get('/user_configuration_list', function(req, response){
@@ -174,6 +226,20 @@ app.post('/applications_create', function(req, response){
         response.send(res.data)
     })
 });
+
+//更新图标
+// app.post('/applications_icon', function (req, response) {
+//     console.log(req.body);
+//     axios({
+//         url: path + '/applications.icon',
+//         method: 'POST',
+//         data: req.body,
+//         headers: req.headers
+//     }).then(res=>{
+//         console.log(res.data);
+//         response.send(res.data)
+//     })
+// });
 
 //修改应用
 app.post('/applications_update', function(req, response){
@@ -243,11 +309,7 @@ app.get('/configurations_version_read', function (req, response) {
         let data = [];
         list && list.length > 0 && list.map((v)=>{
             if (v.version.toString() === req.query.version) {
-                // console.log('--------------')
-                // console.log(v);
                 data.push(v)
-            } else {
-                // console.log('no')
             }
         });
         response.send({message: data, ok: true})
@@ -259,22 +321,18 @@ app.get('/configurations_version_read', function (req, response) {
 ///post
 //修改密码   小崔
 app.post('/user_update_password', function (req, response) {
-    // console.log(req.body);
     sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
-        // console.log(res.data);
         response.send(res.data)
     })
 });
 
 //平台事件确认消息   okokok
 app.post('/activities_dispose', function(req, respones){
-    // console.log(req.body)
     sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
     }).then(res=>{
         respones.send(res.data);
-        // console.log(req.body)
     }).catch(err=>{
         respones.send({message: 'err', ok: false})
     })
@@ -293,7 +351,6 @@ app.post('/events_dispose', function(req, respones){
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    // console.log(req.body.toString());
     sendPostAjax('/configurations.versions.create', req.headers, req.body)
         .then(res=>{
             response.send(res.data)
@@ -311,9 +368,7 @@ app.post('/configurations_versions_create', function (req, response) {
 //     "owner_id": "string"
 // }
 app.post('/configurations_create', function(req, response){
-    // console.log(req);
     sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
-        // console.log(res);
         response.send(res.data)
     }).catch(err=>{
         // console.log('err')
@@ -325,7 +380,6 @@ app.post('/configurations_remove', function(req, respones){
     sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err);
         respones.send(errMessage)
     })
 });
@@ -347,6 +401,8 @@ app.get('/developers_read', function (req, response) {
         response.send('err')
     })
 });
+
+
 
 module.exports = app;
 
