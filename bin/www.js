@@ -115,6 +115,48 @@ app.get('/user_token_read', function(req, respones){
         respones.send(errMessage)
     })
 })
+// 更新Accesskey
+app.post('/user_token_update', function(req, respones){
+    sendPostAjax('/user.token.update', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
+        respones.send(errMessage)
+    })
+})
+// 获取虚拟网关列表
+app.get('/user_virtual_gateways_list', function(req, respones){
+    const arr = [];
+    function queryVirtual(index, data){
+        if (index >= data.length){
+            respones.send({ok: true, data: arr});
+            return false;
+        }
+        data.map(()=>{
+            sendGetAjax('/user.virtual_gateways.read?name=' + data[index], req.headers).then(res=>{
+                arr.push(res.data.data)
+                queryVirtual(index+1, data)
+            })
+        })
+        
+        
+    }
+    sendGetAjax('/user.virtual_gateways.list', req.headers).then(res=>{
+        if (res.data.data && res.data.data.length > 0){
+            queryVirtual(0, res.data.data)
+        }
+    }).catch((err)=>{
+        console.log(err)
+        respones.send(errMessage)
+    })
+})
+// 创建一个新的虚拟网关
+app.get('/user_virtual_gateways_create', function(req, respones){
+    sendGetAjax('/user.virtual_gateways.create', req.headers).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
+        respones.send(errMessage)
+    })
+})
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respons){
     const arr = [];
@@ -145,7 +187,6 @@ app.get('/gateways_list', function(req, respons){
         const company_devices = res.data.data.company_devices;
         const shared_devices = res.data.data.shared_devices;
         const private_devices = res.data.data.private_devices;
-        console.log(company_devices)
         if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
             data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
         } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
@@ -335,7 +376,7 @@ app.post('/gateways_applications_stop', function(req, respones){
 })
 // 查詢應用版本列表
 app.get('/applications_versions_list', function(req, respones){
-    sendGetAjax('/applications.versions.list?app=FreeIOE', req.headers).then(res=>{
+    sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -345,6 +386,7 @@ app.get('/applications_versions_list', function(req, respones){
 app.get('/applications_versions_latest', function(req, respones){
     sendGetAjax('/applications.versions.latest?beta=1&app=FreeIOE', req.headers).then(res=>{
         respones.send(res.data)
+        console.log(res)
     }).catch(err=>{
         respones.send(errMessage)
     })
@@ -485,7 +527,7 @@ app.post('/gateways_applications_upgrade', function(req, respones){
         // console.log(res.data)
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
+        console.log(err)
         respones.send(errMessage)
     })
 })
