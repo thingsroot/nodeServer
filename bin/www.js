@@ -8,7 +8,6 @@ const server = require('./server');
 const client = require('./redis');
 const bodyParser = require('body-parser')
 const InfluxClient = require('./influx');
-
 app.use(function (req, res, next) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -80,6 +79,7 @@ app.post('/user_login', function(req, respons){
          respons.send(errMessage)
      })
 })
+
 // 注册账户 未作处理
 app.post('/user_create', function(req, respons){
     sendPostAjax('/user.create', req.headers, req.body).then(res=>{
@@ -199,6 +199,14 @@ app.get('/gateways_list', function(req, respons){
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
         respons.send(err)
+    })
+})
+// 查询应用详细信息
+app.get('/applications_info', function(req, respones){
+    sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
+        respones.send(errMessage)
     })
 })
 // 删除设备安装应用
@@ -412,33 +420,67 @@ app.get('/gateways_historical_data', function(req, respones){
     // console.log(req.query)
     const obj = req.query;
     client.getInfluxDB(obj.sn).then(index=>{
-        // InfluxClient.queryCount('telegraf', 'cpu', 'time > now() - 5m group by time(10s) fill(none)', 'raw=value_method', function(result){
-            // console.log(result)
-        // })
-        // console.log(new Date() * 1 , '---' , obj._)
         let count = '';
+        let counts = '';
         if (obj.vt === 'float') {
-            count = 'value=' + obj.value_method
+            count = 'value=' + obj.value_method;
+            counts = 'value';
         } else if(obj.vt === 'int') {
-            count = 'int_value=' + obj.value_method
+            count = 'int_value=' + obj.value_method;
+            counts = 'int_value';
         } else {
-            count = 'string_value=' + obj.value_method
+            count = 'string_value=' + obj.value_method;
+            counts = 'string_value';
         }
-        InfluxClient.queryCount(index, obj.tag, obj.time_condition +' group by time(' + obj.group_time_span + ') fill(null) limit 200', count, function(result){
-            // console.log(result)
-            const arr = result.results[0].series ? result.results[0].series[0].values : [];
-            const data = [];
-            arr.map(item=>{
-                data.push({
-                    name: obj.tag,
-                    quality: 0,
-                    time: item[0],
-                    value: item[1] !== null ? item[1].toFixed(2) : 0,
-                    vsn: obj.sn
+        // if (obj.value_method === 'raw'){
+            InfluxClient.query(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', counts, function(result){
+                // console.log(result)
+                const arr = result.results[0].series ? result.results[0].series[0].values : [];
+                const data = [];
+                arr.map(item=>{
+                    data.push({
+                        name: obj.tag,
+                        quality: 0,
+                        time: item[0],
+                        value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
+                        vsn: obj.sn
+                    })
                 })
-            })
-            respones.send({message: data})
-        })
+                respones.send({message: data})
+            }, obj.group_time_span)
+        // } else {
+        //     // InfluxClient.queryCount(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', count, function(result){
+        //     //     // console.log(result)
+        //     //     const arr = result.results[0].series ? result.results[0].series[0].values : [];
+        //     //     const data = [];
+        //     //     arr.map(item=>{
+        //     //         data.push({
+        //     //             name: obj.tag,
+        //     //             quality: 0,
+        //     //             time: item[0],
+        //     //             value: item[1] !== null ? item[1].toFixed(2) : 0,
+        //     //             vsn: obj.sn
+        //     //         })
+        //     //     })
+        //     //     respones.send({message: data})
+        //     // }, obj.group_time_span)
+        //     InfluxClient.query(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', counts, function(result){
+        //         // console.log(result)
+        //         const arr = result.results[0].series ? result.results[0].series[0].values : [];
+        //         const data = [];
+        //         arr.map(item=>{
+        //             data.push({
+        //                 name: obj.tag,
+        //                 quality: 0,
+        //                 time: item[0],
+        //                 value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
+        //                 vsn: obj.sn
+        //             })
+        //         })
+        //         respones.send({message: data})
+        //     }, obj.group_time_span)
+        // }
+        
         
     })
 })
@@ -694,12 +736,7 @@ app.post('/gateways_dev_outputs', function(req, respones){
         respones.send(errMessage)
     })
 });
-
-
-
-
-
-app.listen(8881, function(){
+app.listen(8881, '127.0.0.1', function(){
     console.log('this port is 8881....')
 })    
 

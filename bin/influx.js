@@ -18,7 +18,6 @@
 // //     }
 // // }
 
-
 const Influx = require('influxdb-nodejs');
 const config = {
     user: 'root',
@@ -29,40 +28,40 @@ const config = {
 
 InfluxClient = function() {};
 
-InfluxClient.query = function(table, condition, set, callback) {    
+InfluxClient.query = function(database, table, condition, set, callback, time) {
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     // console.log("#     dblink:" + dblink);
     var client = new Influx(dblink);
     // client.query('video').where('publish = 1').set({limit: 10}).then(console.info).catch(console.error);
-    client.query(table).where(condition).set(set)
+    client.query(table).where(condition).addGroup(time).addFunction(set).set(set)
         .then((data) => {
-            var sql = client.query(table).where(condition).set(set).toString();
+            var sql = client.query(table).where(condition).addGroup(time).addFunction(set).set(set).toString();
             console.info('##    sql: ' + sql);
             callback(data);
-            
         }).catch(console.error);
 };
 
-InfluxClient.queryCount = function(database, table, condition, count, callback) {
+InfluxClient.queryCount = function(database, table, condition, count, callback, time) {
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     // console.log("#     dblink:" + dblink);
     var client = new Influx(dblink);
     var reader = client.query(table);
     // console.log(reader)
     reader = reader.where(condition);
+    console.log(condition)
+    console.log(count)
     var countArr = count.split(",");
-    // console.log(countArr)
+    console.log(countArr)
     for (var i = 0; i <= countArr.length - 1; i++) {
         // console.log(countArr[i].split('='))
-        reader = reader.addFunction(countArr[i].split('=')[1] === 'raw' ? 'mean' : countArr[i].split('=')[1], countArr[i].split('=')[0], {
-            alias: countArr[i].split('=')[1],
-        });
-        // console.log(reader)
-        // console.log(reader.toString())
+        reader = reader.addFunction(countArr[i].split('=')[1] === 'raw' ? '' : countArr[i].split('=')[1], countArr[i].split('=')[0], {
+            alias: countArr[i].split('=')[1] === 'raw' ? '' : countArr[i].split('=')[1] + '_value',
+        })
     }
     reader.then((data) => {
         console.info('##    sql: ' + reader.toString());
         callback(data);
+        console.log(data)
     }).catch(console.error);
 };
 
