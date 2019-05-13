@@ -1,7 +1,18 @@
 var redis = require('redis');
 
 var client = redis.createClient(6380, '172.30.0.187')
-
+client.getGatewayStatus = (sn)=>{
+    let obj = {};
+    client.select(9)
+    return new Promise ((resolve, reject)=>{
+        client.get(sn, function(err, result){
+            if(err){
+                reject('')
+            }
+            resolve(result)
+        })
+    })
+}
 client.getStatus = (sn)=>{
     client.select(12)
     // client.on('connect', function(){
@@ -33,12 +44,31 @@ client.getStatus = (sn)=>{
     // });
     // return obj;
 }
+client.getAppLen = (sn)=>{
+    client.select(6);
+    return new Promise((resolve, reject)=>{
+        let length = 0;
+        client.get(sn,  function(err, result){
+            if (err){
+                reject(err)
+            }
+            // length = JSON.parse(result).length;
+            // console.log(result)
+            
+            if (result) {
+                resolve(Object.keys(JSON.parse(result)).length)
+            } else {
+                resolve(0)
+            }
+        })
+    })
+}
 client.getDevLen = (sn)=>{
     // console.log(sn)
     client.select(11);
     return new Promise((resolve, reject)=>{
         let length = 0;
-        client.hgetall(sn, function(err, result){
+        client.LLEN(sn, function(err, result){
             if (err){
                 reject(err)
             }

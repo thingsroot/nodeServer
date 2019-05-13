@@ -8,16 +8,14 @@ const server = require('./server');
 const client = require('./redis');
 const bodyParser = require('body-parser')
 const InfluxClient = require('./influx');
-app.use(function (req, res, next) {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    next();
-  });
-
+// app.use(function(req, res, next){
+//     if (http.cookie) {
+//         res.setHeader('cookie', http.cookie)
+//     }
+//     next()
+// })
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-
 
 app.use(server);
 // 封装ajax get方式
@@ -157,12 +155,109 @@ app.get('/user_virtual_gateways_create', function(req, respones){
         respones.send(errMessage)
     })
 })
+// 更新网关信息
+app.post('/gateways_update', function(req, respones){
+    sendPostAjax('/gateways.update', req.headers, req.body).then(res=>{
+        console.log(res)
+        respones.send(res.data)
+    }).catch((error)=>{
+        console.log(error)
+        respones.send(errMessage)
+    })
+})
+// redis获取网关列表
+app.get('/gateway_list', function(req, respones){
+    const arr = [];
+    function queryGateway (index, item) {
+        if (index >= item.length){
+            respones.send({message: arr, ok: true})
+        } else {
+            // axios.all(
+            //     [
+            //         http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}),
+            //         http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}),
+            //         http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})
+            //     ]
+            // ).then(axios.spread(function (acct, perms, devices) {
+            //     arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
+            //     queryGateway(index + 1, item)
+            // }));
+            http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
+                let data = res.data.data;
+                client.getDevLen(item[index]).then(DevLen=>{
+                    data.device_devs_num = DevLen;
+                    client.getAppLen(item[index]).then(AppLen=>{
+                        data.device_apps_num = AppLen;
+                        data.last_updated = data.modified.slice(0, -7)
+                        arr.push(data)
+                        queryGateway(index + 1, item)
+                    })
+                })
+            })
+        }
+    }
+    sendGetAjax('/gateways.list', req.headers).then(res=>{
+        let data = [];
+        const company_devices = res.data.data.company_devices;
+        const shared_devices = res.data.data.shared_devices;
+        const private_devices = res.data.data.private_devices;
+        if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
+            data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
+        } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
+            data = company_devices[0].devices.concat(private_devices)
+        } else if (shared_devices && shared_devices.length > 0 && company_devices.length <= 0) {
+            data = shared_devices[0].devices.concat(private_devices)
+        } else {
+            data = private_devices
+        }
+            
+        function promise () {
+            const ONLINE = [];
+            const OFFLINE = [];
+            const NullData = [];
+            return new Promise((resolve, reject)=>{
+                function dataMap (index, item) {
+                    if (index >= item.length) {
+                        resolve({
+                            ONLINE: ONLINE,
+                            OFFLINE: OFFLINE,
+                            NullData: NullData
+                        })
+                    } else {
+                        client.getGatewayStatus(item[index]).then(status=>{
+                            if (status === 'ONLINE') {
+                                ONLINE.push(item[index])
+                            } else if (status === 'OFFLINE') {
+                                OFFLINE.push(item[index])
+                            } else {
+                                NullData.push(item[index])
+                            }
+                            dataMap(index + 1, item)
+                        })
+                    }
+                }
+                dataMap(0, data)
+            })
+        }
+        promise().then(res=>{
+            const count = res.ONLINE.concat(res.OFFLINE.concat(res.NullData))
+            const status = req.query.status;
+            if (status === 'online'){
+                queryGateway(0, res.ONLINE)
+            } else if (status === 'offline'){
+                queryGateway(0, res.OFFLINE)
+            } else {
+                queryGateway(0, count)
+            }
+        })
+    })
+})
 // 获取网关列表 结合两条接口
-app.get('/gateways_list', function(req, respons){
+app.get('/gateways_list', function(req, respones){
     const arr = [];
     function getGatewaysList (index, item){
         if (index >= item.length){
-            respons.send({message: arr, status: 'OK'})
+            respones.send({message: arr, status: 'OK'})
             return false;
         }
         axios.all(
@@ -198,7 +293,7 @@ app.get('/gateways_list', function(req, respons){
         }
         getGatewaysList(0, data, req.headers)
     }).catch(err=>{
-        respons.send(err)
+        respones.send(err)
     })
 })
 // 查询应用详细信息
@@ -499,7 +594,7 @@ app.post('/gateways_applications_refresh', function(req, respones){
 app.post('/gateways_enable_log', function(req, respones){
     sendPostAjax('/gateways.enable_log', req.headers, req.body).then(res=>{
         respones.send(res.data)
-    }).catch(err=>{
+    }).catch((err)=>{
         respones.send(errMessage)    
     })
 })
