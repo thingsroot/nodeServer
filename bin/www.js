@@ -8,6 +8,7 @@ const server = require('./server');
 const client = require('./redis');
 const bodyParser = require('body-parser')
 const InfluxClient = require('./influx');
+const Influx = require('influxdb-nodejs');
 // app.use(function(req, res, next){
 //     if (http.cookie) {
 //         res.setHeader('cookie', http.cookie)
@@ -20,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(server);
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
-    let pathname = '';
+    let pathname = ''; 
     
     
     if (query){
@@ -165,6 +166,25 @@ app.post('/gateways_update', function(req, respones){
         respones.send(errMessage)
     })
 })
+// influxdb 获取在线Ip记录
+app.get('/gateway_online_record', function(req, respones){
+    console.log(req.query)
+    const client = new Influx('http://root:root@172.30.0.187:8086/gates_trace')
+    client.query(req.query.type)
+        // .where(' and "device"="' + req.query.sn + '"')
+        .where('time > now() - 7d ')
+        .where('iot', req.query.sn)
+        .addFunction('ipaddr')
+        .then(res=>{
+        // var sql = client.query(req.query.type).where('time > now() - 7d ').where('iot', req.query.sn).addFunction('ipaddr').toString();
+        // console.info('##   sql:' + sql)
+        if (res.results[0].series) {
+            respones.send({data: res.results[0].series[0].values, ok: true})
+        } else {
+            respones.send({data: [], ok: false})
+        }
+    })
+})
 // redis获取网关列表
 app.get('/gateway_list', function(req, respones){
     const arr = [];
@@ -252,6 +272,14 @@ app.get('/gateway_list', function(req, respones){
         })
     })
 })
+// 网关应用更新
+app.post('/gateways_upgrade', function(req, respones){
+    sendPostAjax('/gateways.upgrade', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
+        respones.send(errMessage)
+    })
+})
 // 获取网关列表 结合两条接口
 app.get('/gateways_list', function(req, respones){
     const arr = [];
@@ -337,6 +365,7 @@ app.get('/gateways_applications_list', function (req, response) {
 app.get('/gateways_read', function(req, respones){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
         client.getStatus(req.query.name).then(result=>{
+            console.log(result)
             client.getNetManager(req.query.name).then(data=>{
                 const newData = Object.values(data);
                 // console.log(newData)
@@ -459,13 +488,21 @@ app.get('/gateways_app_list', function(req, respones){
     })
     
 })
+// 网关应用更改名称
+app.post('/gateways_applications_rename', function(req, respones){
+    sendPostAjax('/gateways.applications.rename', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(err=>{
+        respones.send(errMessage)
+    })
+})
 // 网关应用开启
 app.post('/gateways_applications_start', function(req, respones){
     sendPostAjax('/gateways.applications.start', req.headers, req.body).then(res=>{
         // console.log(res)
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
+        console.log(err)
         respones.send(errMessage)
     })
 })
@@ -474,6 +511,7 @@ app.post('/gateways_applications_stop', function(req, respones){
     sendPostAjax('/gateways.applications.stop', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
+        console.log(err)
         respones.send(errMessage)
     })
 })
@@ -601,7 +639,6 @@ app.post('/gateways_enable_log', function(req, respones){
 // 获取网关设备列表
 app.get('/gateways_dev_list', function(req, respones){
 
-    const Influx = require('influxdb-nodejs');
     const client = new Influx('http://root:root@172.30.0.187:8086/dongsun.com');
     client.query('app_run_ioe_frpc')
         .where('int_value', 'mean_int_value')
