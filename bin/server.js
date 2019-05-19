@@ -1,5 +1,5 @@
 const express = require('express');
-const app = express();
+const app = express.Router();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';

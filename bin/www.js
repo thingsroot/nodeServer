@@ -140,8 +140,11 @@ app.get('/user_virtual_gateways_list', function(req, respones){
         
     }
     sendGetAjax('/user.virtual_gateways.list', req.headers).then(res=>{
+        console.log(res)
         if (res.data.data && res.data.data.length > 0){
             queryVirtual(0, res.data.data)
+        } else {
+            respones.send({data: [], ok: true})
         }
     }).catch((err)=>{
         console.log(err)
@@ -149,8 +152,9 @@ app.get('/user_virtual_gateways_list', function(req, respones){
     })
 })
 // 创建一个新的虚拟网关
-app.get('/user_virtual_gateways_create', function(req, respones){
-    sendGetAjax('/user.virtual_gateways.create', req.headers).then(res=>{
+app.post('/user_virtual_gateways_create', function(req, respones){
+    sendPostAjax('/user.virtual_gateways.create', req.headers).then(res=>{
+        console.log(res)
         respones.send(res.data)
     }).catch(()=>{
         respones.send(errMessage)
@@ -192,16 +196,6 @@ app.get('/gateway_list', function(req, respones){
         if (index >= item.length){
             respones.send({message: arr, ok: true})
         } else {
-            // axios.all(
-            //     [
-            //         http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}),
-            //         http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}),
-            //         http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})
-            //     ]
-            // ).then(axios.spread(function (acct, perms, devices) {
-            //     arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
-            //     queryGateway(index + 1, item)
-            // }));
             http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
                 let data = res.data.data;
                 client.getDevLen(item[index]).then(DevLen=>{
@@ -365,7 +359,6 @@ app.get('/gateways_applications_list', function (req, response) {
 app.get('/gateways_read', function(req, respones){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
         client.getStatus(req.query.name).then(result=>{
-            console.log(result)
             client.getNetManager(req.query.name).then(data=>{
                 const newData = Object.values(data);
                 // console.log(newData)
@@ -446,7 +439,7 @@ app.get('/gateways_app_list', function(req, respones){
                 name.push(item[index].name)
                 axios.all([
                     http.get(path + '/store.read?name=' + item[index].name, req.headers),
-                    http.get(path + '/applications.versions.latest?beta=1&app=' + item[index].name, {headers: req.headers})
+                    http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers})
                 ]).then(axios.spread((res, version)=>{
                     if(!res.data.error){
                         item[index].data = res.data;
@@ -512,6 +505,14 @@ app.post('/gateways_applications_stop', function(req, respones){
         respones.send(res.data)
     }).catch(err=>{
         console.log(err)
+        respones.send(errMessage)
+    })
+})
+// 网关应用重启
+app.post('/gateways_applications_restart', function(req, respones){
+    sendPostAjax('/gateways.applications.restart', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
         respones.send(errMessage)
     })
 })
