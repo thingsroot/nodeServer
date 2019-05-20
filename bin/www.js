@@ -326,6 +326,13 @@ app.get('/applications_info', function(req, respones){
         respones.send(errMessage)
     })
 })
+app.post('/applications_forks_create', function(req, respones){
+    sendPostAjax('/applications.forks.create', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch(()=>{
+        respones.send(errMessage)
+    })
+})
 // 删除设备安装应用
 app.post('/applications_remove', function(req, respones){
     // console.log(req)
@@ -395,7 +402,7 @@ app.get('/gateways_app_list', function(req, respones){
         return new Promise((resolve, reject)=>{
             const arr = [];
             function getDevicesList (index, item){
-                if (index >= item.length){
+                if (item && index >= item.length){
                     resolve(arr)
                     return false;
                 } else {
@@ -408,7 +415,11 @@ app.get('/gateways_app_list', function(req, respones){
                 }
             }
                 sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
-                    getDevicesList(0, res.data.data)
+                    if (res.data.data){
+                        getDevicesList(0, res.data.data)
+                    } else {
+                        respones.send(errMessage)
+                    }
                 })
         })
     }
@@ -493,6 +504,16 @@ app.post('/gateways_applications_rename', function(req, respones){
 app.post('/gateways_applications_start', function(req, respones){
     sendPostAjax('/gateways.applications.start', req.headers, req.body).then(res=>{
         // console.log(res)
+        respones.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+        respones.send(errMessage)
+    })
+})
+// 网关应用配置
+app.post('/gateways_applications_conf', function(req, respones){
+    console.log(req.headers, req.body)
+    sendPostAjax('/gateways.applications.conf', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch(err=>{
         console.log(err)
@@ -664,7 +685,11 @@ app.get('/gateways_dev_list', function(req, respones){
         }
     }
         sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
-            getDevicesList(0, res.data.data)
+            if (res.data.data){
+                getDevicesList(0, res.data.data)
+            } else {
+                respones.send(errMessage)
+            }
         })
 })
 
