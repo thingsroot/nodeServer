@@ -32,6 +32,7 @@ InfluxClient.query = function(database, table, condition, set, callback, time) {
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     // console.log("#     dblink:" + dblink);
     var client = new Influx(dblink);
+    client.setMaxListeners(10)
     // client.query('video').where('publish = 1').set({limit: 10}).then(console.info).catch(console.error);
     client.query(table).where(condition).addGroup(time).addFunction(set).set(set)
         .then((data) => {

@@ -1,6 +1,14 @@
 var redis = require('redis');
 
 var client = redis.createClient(6380, '172.30.0.187')
+
+ 
+client.on("error", function (err) {
+    client.quit()
+    console.log(err)
+    client = redis.createClient(6380, '172.30.0.187');
+});
+
 client.getGatewayStatus = (sn)=>{
     let obj = {};
     client.select(9)
