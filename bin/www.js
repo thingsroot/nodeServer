@@ -10,12 +10,14 @@ const client = require('./redis');
 const bodyParser = require('body-parser')
 const InfluxClient = require('./influx');
 const Influx = require('influxdb-nodejs');
-// app.use(function(req, res, next){
-//     if (http.cookie) {
-//         res.setHeader('cookie', http.cookie)
-//     }
-//     next()
-// })
+app.use(function(req, res, next){
+    if (http.cookie) {
+        res.setHeader('cookie', http.cookie)
+    } else if (req.headers.cookie) {
+        res.setHeader('cookie', req.headers.cookie)
+    }
+    next()
+})
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -654,6 +656,14 @@ app.post('/gateways_applications_refresh', function(req, respones){
 // 要求网关上传设备日志
 app.post('/gateways_enable_log', function(req, respones){
     sendPostAjax('/gateways.enable_log', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch((err)=>{
+        respones.send(errMessage)    
+    })
+})
+// 要求网关上传设备报文
+app.post('/gateways_enable_comm', function(req, respones){
+    sendPostAjax('/gateways.enable_comm', req.headers, req.body).then(res=>{
         respones.send(res.data)
     }).catch((err)=>{
         respones.send(errMessage)    
