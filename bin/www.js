@@ -235,11 +235,13 @@ app.get('/gateway_list', function(req, respones){
             return new Promise((resolve, reject)=>{
                 function dataMap (index, item) {
                     if (index >= item.length) {
-                        resolve({
-                            ONLINE: ONLINE,
-                            OFFLINE: OFFLINE,
-                            NullData: NullData
-                        })
+                        if (true){
+                            resolve({
+                                ONLINE: ONLINE,
+                                OFFLINE: OFFLINE,
+                                NullData: NullData
+                            })
+                        }
                     } else {
                         client.getGatewayStatus(item[index]).then(status=>{
                             if (status === 'ONLINE') {
@@ -329,8 +331,18 @@ app.get('/applications_info', function(req, respones){
         respones.send(errMessage)
     })
 })
+// fork应用
 app.post('/applications_forks_create', function(req, respones){
     sendPostAjax('/applications.forks.create', req.headers, req.body).then(res=>{
+        respones.send(res.data)
+    }).catch((err)=>{
+        respones.send(errMessage)
+    })
+})
+//获取fork应用列表
+app.get('/applications_forks_list', function(req, respones){
+    sendGetAjax('/applications.forks.list', req.headers, req.query).then(res=>{
+        console.log(res)
         respones.send(res.data)
     }).catch(()=>{
         respones.send(errMessage)
