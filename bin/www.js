@@ -133,17 +133,12 @@ app.get('/user_virtual_gateways_list', function(req, respones){
             respones.send({ok: true, data: arr});
             return false;
         }
-        data.map(()=>{
             sendGetAjax('/user.virtual_gateways.read?name=' + data[index], req.headers).then(res=>{
                 arr.push(res.data.data)
                 queryVirtual(index+1, data)
             })
-        })
-        
-        
     }
     sendGetAjax('/user.virtual_gateways.list', req.headers).then(res=>{
-        console.log(res)
         if (res.data.data && res.data.data.length > 0){
             queryVirtual(0, res.data.data)
         } else {
@@ -157,7 +152,6 @@ app.get('/user_virtual_gateways_list', function(req, respones){
 // 创建一个新的虚拟网关
 app.post('/user_virtual_gateways_create', function(req, respones){
     sendPostAjax('/user.virtual_gateways.create', req.headers).then(res=>{
-        console.log(res)
         respones.send(res.data)
     }).catch(()=>{
         respones.send(errMessage)
@@ -166,10 +160,8 @@ app.post('/user_virtual_gateways_create', function(req, respones){
 // 更新网关信息
 app.post('/gateways_update', function(req, respones){
     sendPostAjax('/gateways.update', req.headers, req.body).then(res=>{
-        console.log(res)
         respones.send(res.data)
-    }).catch((error)=>{
-        console.log(error)
+    }).catch(()=>{
         respones.send(errMessage)
     })
 })
