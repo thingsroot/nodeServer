@@ -493,7 +493,7 @@ app.get('/gateways_app_list', function(req, respones){
               } else {
                   item.status = 'stoped';
               }
-            item.device_name = keys[key];
+            item.inst_name = keys[key];
             })
                 getAppList(0, values)
         }).catch(err=>{
