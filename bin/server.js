@@ -3,7 +3,7 @@ const app = express.Router();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
-
+const errMessage = {message: 'error', ok: false}
 var proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 var options = {
     target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
@@ -67,6 +67,8 @@ app.get('/user_read', function (req, response) {
     sendGetAjax('/user.read', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -74,6 +76,8 @@ app.get('/user_groups_list', function (req, response) {
     sendGetAjax('/user.groups.list', req.headers).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -82,6 +86,8 @@ app.get('/applications_list', function(req, response){
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -124,6 +130,8 @@ app.get('/applications_read', function(req, response){
             arr.push(v.name);
         });
         getLatestVersion(0, arr);
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -147,12 +155,13 @@ app.get('/application_configurations_list',function (req, response) {
             }
         }
         list = res.data.data;
-        console.log(res.data);
         let arr = [];
         list && list.length > 0 && list.map((v)=>{
             arr.push(v.name);
         });
         getLatestVersion(0, arr);
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -161,7 +170,6 @@ app.get('/applications_versions_latest', function (req, response) {
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data);
     }).catch(err=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(errMessage)
     })
 });
@@ -171,6 +179,8 @@ app.get('/versions_list', function (req, response) {
     sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data);
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -179,6 +189,8 @@ app.get('/applications_details', function (req, response) {
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -216,6 +228,8 @@ app.get('/user_configuration_list', function(req, response){
             arr.push(v.name);
         });
         getLatestVersion(0, arr);
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -234,28 +248,18 @@ app.post('/applications_create', function(req, response){
     sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
-
-//更新图标
-// app.post('/applications_icon', function (req, response) {
-//     console.log(req.body);
-//     axios({
-//         url: path + '/applications.icon',
-//         method: 'POST',
-//         data: req.body,
-//         headers: req.headers
-//     }).then(res=>{
-//         console.log(res.data);
-//         response.send(res.data)
-//     })
-// });
 
 //修改应用
 app.post('/applications_update', function(req, response){
     sendPostAjax('/applications.update', req.headers, req.body).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -280,6 +284,8 @@ app.get('/platform_activities_lists', function (req, response) {
             data['count'] = res.data.data;
             response.send({data: data, ok: true})
         })
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -302,6 +308,8 @@ app.get('/device_events_list', function (req, response) {
             response.setHeader('cookie', res.headers['set-cookie'].join())
             data['count'] = res.data.data;
             response.send({data: data, ok: true})
+        }).catch(()=>{
+            response.send(errMessage)
         })
     })
 });
@@ -312,7 +320,7 @@ app.get('/configurations_versions_list', function (req, response) {
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data);
     }).catch(err=>{
-        // console.log('err')
+        response.send(errMessage)
     })
 });
 
@@ -329,7 +337,7 @@ app.get('/configurations_version_read', function (req, response) {
         });
         response.send({message: data, ok: true})
     }).catch(err=>{
-        // console.log('err')
+        response.send(errMessage)
     })
 });
 
@@ -339,6 +347,8 @@ app.post('/user_update_password', function (req, response) {
     sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
     })
 });
 
@@ -351,7 +361,7 @@ app.post('/activities_dispose', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data);
     }).catch(err=>{
-        respones.send({message: 'err', ok: false})
+        respones.send(errMessage)
     })
 });
 //设备事件确认消息 okokok
@@ -363,7 +373,7 @@ app.post('/events_dispose', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data);
     }).catch(err=>{
-        respones.send({message: 'err', ok: false})
+        respones.send(errMessage)
     })
 });
 
@@ -373,6 +383,9 @@ app.post('/configurations_versions_create', function (req, response) {
         .then(res=>{
             response.setHeader('cookie', res.headers['set-cookie'].join())
             response.send(res.data)
+        })
+        .catch(err=>{
+            response.send(errMessage)
         })
 });
 
@@ -391,7 +404,7 @@ app.post('/configurations_create', function(req, response){
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
     }).catch(err=>{
-        // console.log('err')
+        response.send(errMessage)
     })
 });
 
@@ -401,7 +414,6 @@ app.post('/configurations_remove', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(errMessage)
     })
 });
@@ -412,7 +424,6 @@ app.get('/configurations_read', function (req, response) {
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
     }).catch(err=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send('err')
     })
 });
@@ -423,7 +434,6 @@ app.get('/developers_read', function (req, response) {
         response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
     }).catch(err=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send('err')
     })
 });

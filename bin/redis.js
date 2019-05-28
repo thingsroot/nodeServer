@@ -5,7 +5,6 @@ var client = redis.createClient(6380, '172.30.0.187')
  
 client.on("error", function (err) {
     client.quit()
-    console.log(err)
     client = redis.createClient(6380, '172.30.0.187');
 });
 
@@ -23,9 +22,6 @@ client.getGatewayStatus = (sn)=>{
 }
 client.getStatus = (sn)=>{
     client.select(12)
-    // client.on('connect', function(){
-    //     console.log(client.exists(sn))
-    // })
     return new Promise((resolve, reject)=>{
         let obj = {};
         let newObj = {};
@@ -34,7 +30,6 @@ client.getStatus = (sn)=>{
                 reject(newObj)
             }
                 obj = Object(result);
-                //console.log(obj['comm_upload/value'])
                 for (key in obj){
                     const value = JSON.parse(obj[key])
                     const keys = key.split('/')[0];
@@ -47,10 +42,6 @@ client.getStatus = (sn)=>{
                 resolve(newObj)
         })
     })
-    // client.on('ready',function(err){
-    //     console.log('ready');
-    // });
-    // return obj;
 }
 client.getAppLen = (sn)=>{
     client.select(6);
@@ -60,9 +51,6 @@ client.getAppLen = (sn)=>{
             if (err){
                 reject(err)
             }
-            // length = JSON.parse(result).length;
-            // console.log(result)
-            
             if (result) {
                 resolve(Object.keys(JSON.parse(result)).length)
             } else {
@@ -80,8 +68,6 @@ client.getDevLen = (sn)=>{
             if (err){
                 reject(err)
             }
-            // length = JSON.parse(result).length;
-            // console.log(result)
             resolve(result)
         })
     })
@@ -104,7 +90,6 @@ client.getMeta = (sn)=>{
             if (err){
                 reject(err)
             }
-            // console.log(JSON.parse(result))
         })
     })
 }

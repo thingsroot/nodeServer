@@ -31,8 +31,6 @@ function sendGetAjax (url, headers, query){
     } else {
         pathname = path + url;
     }
-    
-    // console.log(pathname)
     return new Promise((resolve, reject)=>{
         http.get(pathname, {
             headers
@@ -59,9 +57,7 @@ function sendPostAjax (url, headers, body){
 
 // 转接login 未作处理
 app.post('/user_login', function(req, respons){
-    // console.log(req.body)
      sendPostAjax('/user.login', undefined, req.body).then(res=>{
-        //  console.log(res)
         const data = {
             data: res.data,
             status: res.status,
@@ -82,7 +78,6 @@ app.post('/user_create', function(req, respons){
         respons.send(res.data)
     }).catch(err=>{
         respons.setHeader('cookie', res.headers['set-cookie'].join())
-        console.log(err)
         respons.send(errMessage)
     })
 })
@@ -99,10 +94,8 @@ app.post('/user_reset_password', function(req, respons){
 
 // 重新获取csrftoken
 app.get('/user_csrf_token', function(req, respones){
-    // console.log(req)
     sendGetAjax('/user.csrf_token', req.headers).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res)
         respones.send(res.data);
     })
 })
@@ -112,7 +105,6 @@ app.get('/user_token_read', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err);
         respones.send(errMessage)
     })
 })
@@ -172,7 +164,6 @@ app.post('/gateways_update', function(req, respones){
 })
 // influxdb 获取在线Ip记录
 app.get('/gateway_online_record', function(req, respones){
-    console.log(req.query)
     const client = new Influx('http://root:root@172.30.0.187:8086/gates_trace')
     client.query(req.query.type)
         // .where(' and "device"="' + req.query.sn + '"')
@@ -200,7 +191,6 @@ app.get('/gateway_list', function(req, respones){
     function queryGateway (index, item) {
         if (index >= item.length){
             respones.setHeader('cookie', cookie)
-            console.log(cookie)
             respones.send({message: arr, ok: true})
         } else {
             http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
@@ -219,9 +209,7 @@ app.get('/gateway_list', function(req, respones){
         }
     }
     sendGetAjax('/gateways.list', req.headers).then(res=>{
-        console.log(res)
         cookie = res.headers['set-cookie'].join()
-        console.log(respones)
         let data = [];
         const company_devices = res.data.data.company_devices;
         const shared_devices = res.data.data.shared_devices;
@@ -289,51 +277,51 @@ app.post('/gateways_upgrade', function(req, respones){
     })
 })
 // 获取网关列表 结合两条接口
-app.get('/gateways_list', function(req, respones){
-    const arr = [];
-    function getGatewaysList (index, item){
-        if (index >= item.length){
+// app.get('/gateways_list', function(req, respones){
+//     const arr = [];
+//     function getGatewaysList (index, item){
+//         if (index >= item.length){
 
-            respones.send({message: arr, status: 'OK'})
-            return false;
-        }
-        axios.all(
-            [
-                http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}),
-                http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}),
-                http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})
-            ]
-        ).then(axios.spread(function (acct, perms, devices) {
-            arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
-            if(index < item.length){
-                getGatewaysList(index + 1, item)
-            }
-        }));
-    }
-    axios({
-        url: path + '/gateways.list',
-        method: 'GET',
-        headers: req.headers
-    }).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
-        let data = [];
-        const company_devices = res.data.data.company_devices;
-        const shared_devices = res.data.data.shared_devices;
-        const private_devices = res.data.data.private_devices;
-        if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
-            data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
-        } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
-            data = company_devices[0].devices.concat(private_devices)
-        } else if (shared_devices && shared_devices.length > 0 && company_devices.length <= 0) {
-            data = shared_devices[0].devices.concat(private_devices)
-        } else {
-            data = private_devices
-        }
-        getGatewaysList(0, data, req.headers)
-    }).catch(err=>{
-        respones.send(err)
-    })
-})
+//             respones.send({message: arr, status: 'OK'})
+//             return false;
+//         }
+//         axios.all(
+//             [
+//                 http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}),
+//                 http.get(path + '/gateways.applications.list?gateway=' + item[index], {headers: req.headers}),
+//                 http.get( path + '/gateways.devices.list?gateway=' + item[index], {headers:req.headers})
+//             ]
+//         ).then(axios.spread(function (acct, perms, devices) {
+//             arr.push({data:acct.data.data, app: perms.data, devices: devices.data})
+//             if(index < item.length){
+//                 getGatewaysList(index + 1, item)
+//             }
+//         }));
+//     }
+//     axios({
+//         url: path + '/gateways.list',
+//         method: 'GET',
+//         headers: req.headers
+//     }).then(res=>{
+//         respones.setHeader('cookie', res.headers['set-cookie'].join())
+//         let data = [];
+//         const company_devices = res.data.data.company_devices;
+//         const shared_devices = res.data.data.shared_devices;
+//         const private_devices = res.data.data.private_devices;
+//         if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
+//             data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
+//         } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
+//             data = company_devices[0].devices.concat(private_devices)
+//         } else if (shared_devices && shared_devices.length > 0 && company_devices.length <= 0) {
+//             data = shared_devices[0].devices.concat(private_devices)
+//         } else {
+//             data = private_devices
+//         }
+//         getGatewaysList(0, data, req.headers)
+//     }).catch(err=>{
+//         respones.send(err)
+//     })
+// })
 // 查询应用详细信息
 app.get('/applications_info', function(req, respones){
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
@@ -363,13 +351,10 @@ app.get('/applications_forks_list', function(req, respones){
 })
 // 删除设备安装应用
 app.post('/applications_remove', function(req, respones){
-    // console.log(req)
     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -377,16 +362,13 @@ app.post('/applications_remove', function(req, respones){
 app.post('/gateways_create', function(req, respones){
     sendPostAjax('/gateways.create', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        console.log(res);
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
         respones.send(errMessage)
     })
 })
 
 app.get('/gateways_applications_list', function (req, response) {
-    console.log(req.query)
     sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
@@ -400,13 +382,11 @@ app.get('/gateways_read', function(req, respones){
         client.getStatus(req.query.name).then(result=>{
             client.getNetManager(req.query.name).then(data=>{
                 const newData = Object.values(data);
-                // console.log(newData)
                 result.Net_Manager = false;
                 result.p2p_vpn = false;
                 res.data.data.use_beta = res.data.data.use_beta ? Boolean(res.data.data.use_beta) : false;
                 result.data_upload = result.data_upload? Boolean(result.data_upload): false;
                 result.stat_upload = result.stat_upload? Boolean(result.stat_upload): false;
-                // retult.use_beta = Boolean(retult.use_beta);
                 newData.map(item=>{
                     if (item.name === 'network_uci'){
                         result.Net_Manager = true;
@@ -415,14 +395,10 @@ app.get('/gateways_read', function(req, respones){
                         result.p2p_vpn = true;
                     }
                 });
-                // console.log(result)
                 const Obj = Object.assign(result, res.data.data);
                 respones.send(Obj)
             })
-            
-            
         })
-        // respones.send(res.data.data)
     })
 })
 // 获取App列表
@@ -467,10 +443,6 @@ app.get('/gateways_app_list', function(req, respones){
                     } else {
                         obj[item.meta.app_inst]++;
                     }
-                //    console.log(item.meta, key)
-                    // arr.map((value, index)=>{
-                        // console.log(item.meta, '-----', value)
-                    // })
                 })
                 arr.map((item, key)=>{
                     item.devs_len = obj[item.device_name]
@@ -505,7 +477,6 @@ app.get('/gateways_app_list', function(req, respones){
             const data = res.data.data;
             const keys = Object.keys(data)
             const values = Object.values(data)
-            // console.log(values)
             values.map((item, key)=>{
               if (item.running){
                   item.status = 'running';
@@ -540,21 +511,17 @@ app.post('/gateways_applications_rename', function(req, respones){
 app.post('/gateways_applications_start', function(req, respones){
     sendPostAjax('/gateways.applications.start', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res)
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
         respones.send(errMessage)
     })
 })
 // 网关应用配置
 app.post('/gateways_applications_conf', function(req, respones){
-    console.log(req.headers, req.body)
     sendPostAjax('/gateways.applications.conf', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
         respones.send(errMessage)
     })
 })
@@ -564,7 +531,6 @@ app.post('/gateways_applications_stop', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
         respones.send(errMessage)
     })
 })
@@ -607,7 +573,6 @@ app.get('/gateways_dev_data', function(req, respones){
 })
 // 获取网关历史数据
 app.get('/gateways_historical_data', function(req, respones){
-    // console.log(req.query)
     const obj = req.query;
     client.getInfluxDB(obj.sn).then(index=>{
         let count = '';
@@ -622,9 +587,7 @@ app.get('/gateways_historical_data', function(req, respones){
             count = 'string_value=' + obj.value_method;
             counts = 'string_value';
         }
-        // if (obj.value_method === 'raw'){
             InfluxClient.query(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', counts, function(result){
-                // console.log(result)
                 const arr = result.results[0].series ? result.results[0].series[0].values : [];
                 const data = [];
                 arr.map(item=>{
@@ -638,40 +601,6 @@ app.get('/gateways_historical_data', function(req, respones){
                 })
                 respones.send({message: data})
             }, obj.group_time_span)
-        // } else {
-        //     // InfluxClient.queryCount(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', count, function(result){
-        //     //     // console.log(result)
-        //     //     const arr = result.results[0].series ? result.results[0].series[0].values : [];
-        //     //     const data = [];
-        //     //     arr.map(item=>{
-        //     //         data.push({
-        //     //             name: obj.tag,
-        //     //             quality: 0,
-        //     //             time: item[0],
-        //     //             value: item[1] !== null ? item[1].toFixed(2) : 0,
-        //     //             vsn: obj.sn
-        //     //         })
-        //     //     })
-        //     //     respones.send({message: data})
-        //     // }, obj.group_time_span)
-        //     InfluxClient.query(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', counts, function(result){
-        //         // console.log(result)
-        //         const arr = result.results[0].series ? result.results[0].series[0].values : [];
-        //         const data = [];
-        //         arr.map(item=>{
-        //             data.push({
-        //                 name: obj.tag,
-        //                 quality: 0,
-        //                 time: item[0],
-        //                 value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
-        //                 vsn: obj.sn
-        //             })
-        //         })
-        //         respones.send({message: data})
-        //     }, obj.group_time_span)
-        // }
-        
-        
     })
 })
 
@@ -680,7 +609,6 @@ app.get('/gateways_historical_data', function(req, respones){
 app.post('/gateways_applications_refresh', function(req, respones){
     sendPostAjax('/gateways.applications.refresh', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -707,19 +635,19 @@ app.post('/gateways_enable_comm', function(req, respones){
 // 获取网关设备列表
 app.get('/gateways_dev_list', function(req, respones){
 
-    const client = new Influx('http://root:root@172.30.0.187:8086/dongsun.com');
-    client.query('app_run_ioe_frpc')
-        .where('int_value', 'mean_int_value')
-        //.where('mean_quality', 'value')
-        .then(function(err, result){
-            // console.log(err, result)
-        })
+    // const client = new Influx('http://root:root@172.30.0.187:8086/dongsun.com');
+    // client.query('app_run_ioe_frpc')
+    //     .where('int_value', 'mean_int_value')
+    //     //.where('mean_quality', 'value')
+    //     .then(function(err, result){
+    //         // console.log(err, result)
+    //     })
     
 
     const arr = [];
     function getDevicesList (index, item){
         if (index >= item.length){
-            respones.send({message: arr, status: 'OK'})
+            respones.send({message: arr, ok: true})
             return false;
         } else {
             http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
@@ -736,7 +664,7 @@ app.get('/gateways_dev_list', function(req, respones){
             if (res.data.data){
                 getDevicesList(0, res.data.data)
             } else {
-                respones.send(errMessage)
+                respones.send({data: [], ok: true})
             }
         })
 })
@@ -756,19 +684,15 @@ app.post('/gateways_data_enable', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, respones){
-    // console.log(req)
     sendPostAjax('/gateways.beta.enable', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
-        // console.log(res);
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -776,10 +700,8 @@ app.post('/gateways_beta_enable', function(req, respones){
 app.post('/gateways_applications_upgrade', function(req, respones){
     sendPostAjax('/gateways.applications.upgrade', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res.data)
         respones.send(res.data)
     }).catch(err=>{
-        console.log(err)
         respones.send(errMessage)
     })
 })
@@ -788,9 +710,7 @@ app.post('/gateways_beta_disable', function(req, respones){
     sendPostAjax('/gateways.beta.disable', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
-        // console.log(res);
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
@@ -800,15 +720,12 @@ app.post('/gateways_remove', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
 //获取APP列表 未作处理 未测试
 app.get('/store_list', function(req, respones){
     sendGetAjax('/store.list', req.headers).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
-    // sendGetAjax('/applications.list', req.headers).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
@@ -817,7 +734,6 @@ app.get('/store_list', function(req, respones){
 })
 // 安装APP okokok
 app.post('/gateways_applications_install', function(req, response){
-    console.log(req.body);
     axios({
         url: path + '/gateways.applications.install',
         method: 'POST',
@@ -833,7 +749,6 @@ app.post('/gateways_applications_remove', function(req, respones){
         respones.setHeader('cookie', res.headers['set-cookie'].join())
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)    
     })
 })
@@ -850,14 +765,12 @@ app.post('/gateways_applications_option', function(req, respones){
 app.get('/gateways_exec_result', function(req, respones){
     sendGetAjax('/gateways.exec_result', req.headers, req.query).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res);
         respones.send(res.data)
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 })
-// 网关信息查询 未做处理 未测试
+// 网关信息查询
 app.post('/gateways_info', function(req, respones){
     sendPostAjax('/gateways.info', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
@@ -866,11 +779,10 @@ app.post('/gateways_info', function(req, respones){
         respons.send(err)
     })
 })
-// 获取  未处理 未测试
+// 获取
 app.get('/gateway_devf_data', function(req, respones){
     sendGetAjax('/gateways.devices.data', req.headers, req.query).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res);
         res.data && res.data.length > 0 && res.data.map((item)=>{
                     if (!item.vt){
                         item.vt = 'float'
@@ -882,7 +794,6 @@ app.get('/gateway_devf_data', function(req, respones){
 app.get('/store_read', function(req, respones){
     sendGetAjax('/store.read', req.headers, req.query).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res)
         respones.send(res.data)
     })
 })
@@ -937,10 +848,8 @@ app.post('/gateways_restart', function(req, respones){
 app.post('/gateways_dev_outputs', function(req, respones){
     sendPostAjax('/gateways.devices.output', req.headers, req.body).then(res=>{
         respones.setHeader('cookie', res.headers['set-cookie'].join())
-        // console.log(res)
         respones.send(res.data);
     }).catch(err=>{
-        // console.log(err)
         respones.send(errMessage)
     })
 });
