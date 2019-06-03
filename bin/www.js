@@ -740,7 +740,7 @@ app.post('/gateways_applications_install', function(req, response){
         data: req.body,
         headers: req.headers
     }).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
+        response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send({data: res.data, ok: true})
     })
 })
