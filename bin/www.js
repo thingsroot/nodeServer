@@ -735,15 +735,15 @@ app.get('/store_list', function(req, response){
     })
 })
 // 安装APP okokok
-app.post('/gateways_applications_install', function(req, responsee){
+app.post('/gateways_applications_install', function(req, response){
     axios({
         url: path + '/gateways.applications.install',
         method: 'POST',
         data: req.body,
         headers: req.headers
     }).then(res=>{
-        responsee.setHeader('cookie', res.headers['set-cookie'].join())
-        responsee.send({data: res.data, ok: true})
+        response.setHeader('cookie', res.headers['set-cookie'].join())
+        response.send({data: res.data, ok: true})
     })
 })
 app.post('/gateways_applications_remove', function(req, response){
