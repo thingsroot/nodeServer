@@ -447,7 +447,7 @@ app.get('/gateways_app_list', function(req, response){
                     }
                 })
                 arr.map((item, key)=>{
-                    item.devs_len = obj[item.device_name]
+                    item.devs_len = obj[item.inst_name]
                     if (!item.devs_len){
                         item.devs_len = 0;
                     }
