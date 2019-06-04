@@ -370,7 +370,7 @@ app.post('/gateways_create', function(req, respones){
 
 app.get('/gateways_applications_list', function (req, response) {
     sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
+        response.setHeader('cookie', res.headers['set-cookie'].join())
         response.send(res.data)
     })
 })
