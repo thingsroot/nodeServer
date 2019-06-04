@@ -93,49 +93,30 @@ app.get('/applications_list', function(req, response){
 
 // 应用详情  okokok     app: 应用id  user:  用户id
 app.get('/applications_read', function(req, response){
-    sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
-        let obj = {};
-        let list = [];
-        function getLatestVersion(index, item) {
-            if (index >= item.length) {
-                axios.all(
-                    [
-                        http.get(path + '/applications.read?name=' + req.query.app, {headers: req.headers}),
-                        http.get(path + '/applications.versions.list?app=' + req.query.app, {headers: req.headers}),
-                        http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
-                    ]
-                ).then(axios.spread(function (details, versionList, versionLatest) {
-
-                    obj['data'] = details.data;
-                    obj['versionList'] = versionList.data;
-                    obj['versionLatest'] = versionLatest.data;
-                    response.send({data: obj, ok: true});
-                }));
-                return false;
-            } else {
-                sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
-                    list && list.length > 0 && list.map((v)=>{
-                        if (v.name === item[index]) {
-                            v['latest_version'] = res.data.data;
-                        }
-                    });
-                    getLatestVersion(index + 1, item, req.headers)
-                })
-            }
-        }
-        list = res.data.data;
-        let arr = [];
-        list && list.length > 0 && list.map((v)=>{
-            arr.push(v.name);
-        });
-        getLatestVersion(0, arr);
-    }).catch(()=>{
+    sendGetAjax('/applications.read?name=' + req.query.app, req.headers).then(res=>{
+		response.setHeader('cookie', res.headers['set-cookie'].join())
+		if (res.data.ok) {
+			let obj = {};
+			obj['data'] = res.data.data;
+			axios.all(
+				[
+					http.get(path + '/applications.versions.list?app=' + req.query.app, {headers: req.headers}),
+					http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
+				]
+			).then(axios.spread(function (versionList, versionLatest) {
+				obj['versionList'] = versionList.data;
+				obj['versionLatest'] = versionLatest.data;
+				response.send({data: obj, ok: true});
+			}));
+		} else {
+			response.send(res.data)
+		}
+	}).catch(()=>{
         response.send(errMessage)
     })
 });
 
-app.get('/application_configurations_list',function (req, response) {
+app.get('/store_configurations_list',function (req, response) {
     sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         let list = [];
@@ -196,7 +177,7 @@ app.get('/applications_details', function (req, response) {
 
 //我的应用下对应的模板列表   okokok
 app.get('/user_configuration_list', function(req, response){
-    sendGetAjax('/configurations.list?conf_type=Configuration', req.headers).then(res=>{
+    sendGetAjax('/configurations.list?conf_type=Template', req.headers).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         let obj = [];
         let list = [];
@@ -204,7 +185,7 @@ app.get('/user_configuration_list', function(req, response){
         function getLatestVersion(index, item) {
             if (index >= item.length) {
                 obj = list;
-                response.send({message: list, ok: true})
+                response.send({data: list, ok: true})
             } else {
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
                     list && list.length > 0 && list.map((v)=>{
@@ -329,13 +310,17 @@ app.get('/configurations_version_read', function (req, response) {
     sendGetAjax('/configurations.versions.list?conf=' + req.query.conf, req.headers).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
         let list = res.data.data;
-        let data = [];
+        let data = undefined;
         list && list.length > 0 && list.map((v)=>{
             if (v.version.toString() === req.query.version) {
-                data.push(v)
+                data = v.data;
             }
         });
-        response.send({message: data, ok: true})
+		if (data === undefined) {
+			response.send({error: 'version_not_found', ok: false})
+		} else {
+			response.send({data: data, ok: true})
+		}
     }).catch(err=>{
         response.send(errMessage)
     })
@@ -425,6 +410,16 @@ app.get('/configurations_read', function (req, response) {
         response.send(res.data)
     }).catch(err=>{
         response.send('err')
+    })
+});
+
+//更新模板信息
+app.post('/configurations_update', function (req, response) {
+    sendPostAjax('/configurations.update', req.headers, req.body).then(res=>{
+        response.setHeader('cookie', res.headers['set-cookie'].join())
+        response.send(res.data)
+    }).catch(err=>{
+        respones.send(errMessage)
     })
 });
 
