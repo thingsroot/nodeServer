@@ -368,12 +368,11 @@ app.post('/gateways_create', function(req, response){
     })
 })
 
-app.get('/gateways_applications_list', function (req, responsee) {
+app.get('/gateways_applications_list', function (req, response) {
     sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
         response.setHeader('cookie', res.headers['set-cookie'].join())
-        responsee.send(res.data)
+        response.send(res.data)
     }).catch(err=>{
-		console.log(err)
         response.send(errMessage)
     })
 })
