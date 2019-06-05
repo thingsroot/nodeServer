@@ -855,6 +855,18 @@ app.post('/gateways_dev_outputs', function(req, response){
         response.send(errMessage)
     })
 });
+
+// 发送设备控制指令
+
+app.post('/gateways_dev_commands', function(req, response){
+    sendPostAjax('/gateways.devices.command', req.headers, req.body).then(res=>{
+        response.setHeader('cookie', res.headers['set-cookie'].join())
+        response.send(res.data);
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+});
+
 app.listen(8881, '127.0.0.1', function(){
     console.log('this port is 8881....')
 })    
