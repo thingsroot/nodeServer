@@ -57,15 +57,19 @@ function sendPostAjax (url, headers, body){
 
 // 转接login 未作处理
 app.post('/user_login', function(req, response){
-     sendPostAjax('/user.login', undefined, req.body).then(res=>{
-        const data = {
-            data: res.data,
-            status: res.status,
-            statusText: res.statusText,
-            headers: res.headers
-        }
+     sendPostAjax('/user.login', req.headers, req.body).then(res=>{
         response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(data)
+        response.send(res.data)
+     }).catch(err=>{
+         response.send(errMessage)
+     })
+})
+
+// 转接logout 未作处理
+app.post('/user_logout', function(req, response){
+     sendPostAjax('/user.logout', req.headers, req.body).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
      }).catch(err=>{
          response.send(errMessage)
      })
