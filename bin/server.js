@@ -65,7 +65,7 @@ function sendPostAjax (url, headers, query){
 //个人信息   ok
 app.get('/user_read', function (req, response) {
     sendGetAjax('/user.read', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -74,7 +74,7 @@ app.get('/user_read', function (req, response) {
 
 app.get('/user_groups_list', function (req, response) {
     sendGetAjax('/user.groups.list', req.headers).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -84,7 +84,7 @@ app.get('/user_groups_list', function (req, response) {
 //应用列表   ok
 app.get('/applications_list', function(req, response){
     sendGetAjax('/applications.list', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -94,7 +94,7 @@ app.get('/applications_list', function(req, response){
 // 应用详情  okokok     app: 应用id  user:  用户id
 app.get('/applications_read', function(req, response){
     sendGetAjax('/applications.read?name=' + req.query.app, req.headers).then(res=>{
-		response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
 		if (res.data.ok) {
 			let obj = {};
 			obj['data'] = res.data.data;
@@ -118,7 +118,7 @@ app.get('/applications_read', function(req, response){
 
 app.get('/store_configurations_list',function (req, response) {
     sendGetAjax('/store.configurations.list', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         let list = [];
         function getLatestVersion(index, item) {
             if (index >= item.length) {
@@ -148,7 +148,7 @@ app.get('/store_configurations_list',function (req, response) {
 
 app.get('/applications_versions_latest', function (req, response) {
     sendGetAjax('/applications.versions.latest', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data);
     }).catch(err=>{
         response.send(errMessage)
@@ -158,7 +158,7 @@ app.get('/applications_versions_latest', function (req, response) {
 //刷新应用版本列表
 app.get('/versions_list', function (req, response) {
     sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data);
     }).catch(()=>{
         response.send(errMessage)
@@ -168,7 +168,7 @@ app.get('/versions_list', function (req, response) {
 //单个APP详情
 app.get('/applications_details', function (req, response) {
     sendGetAjax('/applications.read', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -178,7 +178,7 @@ app.get('/applications_details', function (req, response) {
 //我的应用下对应的模板列表   okokok
 app.get('/user_configuration_list', function(req, response){
     sendGetAjax('/configurations.list?conf_type=Template', req.headers).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         let obj = [];
         let list = [];
         let app = req.query.app;
@@ -227,7 +227,7 @@ app.get('/user_configuration_list', function(req, response){
 //创建新应用   okokok
 app.post('/applications_create', function(req, response){
     sendPostAjax('/applications.create', req.headers, req.body).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -237,7 +237,7 @@ app.post('/applications_create', function(req, response){
 //修改应用
 app.post('/applications_update', function(req, response){
     sendPostAjax('/applications.update', req.headers, req.body).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(()=>{
         response.send(errMessage)
@@ -261,7 +261,7 @@ app.get('/platform_activities_lists', function (req, response) {
     }).then(res=>{
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
-            response.setHeader('cookie', res.headers['set-cookie'].join())
+			response.setHeader('set-cookie', res.headers['set-cookie'])
             data['count'] = res.data.data;
             response.send({data: data, ok: true})
         })
@@ -286,7 +286,7 @@ app.get('/device_events_list', function (req, response) {
     }).then(res=>{
         data['list'] = res.data;
         sendGetAjax('/'+ req.query.category +'.events.count?name=' + req.query.name, req.headers).then(res=>{
-            response.setHeader('cookie', res.headers['set-cookie'].join())
+			response.setHeader('set-cookie', res.headers['set-cookie'])
             data['count'] = res.data.data;
             response.send({data: data, ok: true})
         }).catch(()=>{
@@ -298,7 +298,7 @@ app.get('/device_events_list', function (req, response) {
 //获取模板版本列表    okokok   conf:  模板id
 app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data);
     }).catch(err=>{
         response.send(errMessage)
@@ -308,7 +308,7 @@ app.get('/configurations_versions_list', function (req, response) {
 //获取某个模板指定版本下的数据    conf: 模板id   version： 指定版本号
 app.get('/configurations_version_read', function (req, response) {
     sendGetAjax('/configurations.versions.list?conf=' + req.query.conf, req.headers).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         let list = res.data.data;
         let data = undefined;
         list && list.length > 0 && list.map((v)=>{
@@ -330,7 +330,7 @@ app.get('/configurations_version_read', function (req, response) {
 //修改密码   小崔
 app.post('/user_update_password', function (req, response) {
     sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
         response.send(errMessage)
@@ -343,7 +343,7 @@ app.post('/activities_dispose', function(req, respones){
         activities: req.body.activities,
         disposed: req.body.disposed
     }).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         respones.send(res.data);
     }).catch(err=>{
         respones.send(errMessage)
@@ -355,7 +355,7 @@ app.post('/events_dispose', function(req, respones){
         events: req.body.events,
         disposed: req.body.disposed
     }).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         respones.send(res.data);
     }).catch(err=>{
         respones.send(errMessage)
@@ -366,7 +366,7 @@ app.post('/events_dispose', function(req, respones){
 app.post('/configurations_versions_create', function (req, response) {
     sendPostAjax('/configurations.versions.create', req.headers, req.body)
         .then(res=>{
-            response.setHeader('cookie', res.headers['set-cookie'].join())
+			response.setHeader('set-cookie', res.headers['set-cookie'])
             response.send(res.data)
         })
         .catch(err=>{
@@ -386,7 +386,7 @@ app.post('/configurations_versions_create', function (req, response) {
 // }
 app.post('/configurations_create', function(req, response){
     sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
         response.send(errMessage)
@@ -396,7 +396,7 @@ app.post('/configurations_create', function(req, response){
 //删除模板   okokok
 app.post('/configurations_remove', function(req, respones){
     sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
-        respones.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         respones.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -406,7 +406,7 @@ app.post('/configurations_remove', function(req, respones){
 //读取模板信息
 app.get('/configurations_read', function (req, response) {
     sendGetAjax('/configurations.read', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
         response.send('err')
@@ -416,7 +416,7 @@ app.get('/configurations_read', function (req, response) {
 //更新模板信息
 app.post('/configurations_update', function (req, response) {
     sendPostAjax('/configurations.update', req.headers, req.body).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
         respones.send(errMessage)
@@ -426,7 +426,7 @@ app.post('/configurations_update', function (req, response) {
 //查询是否是开发者
 app.get('/developers_read', function (req, response) {
     sendGetAjax('/developers.read', req.headers, req.query).then(res=>{
-        response.setHeader('cookie', res.headers['set-cookie'].join())
+		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
         response.send('err')
