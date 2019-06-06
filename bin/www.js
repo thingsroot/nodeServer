@@ -168,7 +168,7 @@ app.post('/gateways_update', function(req, response){
 })
 // influxdb 获取在线Ip记录
 app.get('/gateway_online_record', function(req, response){
-    const client = new Influx('http://root:root@172.30.0.187:8086/gates_trace')
+	const client = InfluxClient.getClient('gates_trace');
     client.query(req.query.type)
         // .where(' and "device"="' + req.query.sn + '"')
         .where('time > now() - 7d ')

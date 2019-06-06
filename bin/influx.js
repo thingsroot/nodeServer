@@ -8,6 +8,12 @@ const config = {
 
 InfluxClient = function() {};
 
+InfluxClient.getClient = function(database) {
+    var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
+    var client = new Influx(dblink);
+	return client;
+}
+
 InfluxClient.query = function(database, table, condition, set, callback, time) {
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     var client = new Influx(dblink);
