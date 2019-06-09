@@ -35,10 +35,6 @@ client.getStatus = (sn)=>{
                     const keys = key.split('/')[0];
                     newObj[keys] = value[1];
                 }
-                newObj['cpu'] = "imx6ull 528MHz"
-                newObj['ram'] = "256 MB"
-                newObj['rom'] = "4 GB"
-                newObj['os'] = "openwrt"
                 resolve(newObj)
         })
     })

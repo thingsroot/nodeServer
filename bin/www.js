@@ -393,6 +393,11 @@ app.get('/gateways_read', function(req, response){
 		let result_data = res.data.data;
 		result_data.use_beta = result_data.use_beta ? Boolean(result_data.use_beta) : false
 
+		result_data['cpu'] = "imx6ull 528MHz"
+		result_data['ram'] = "256 MB"
+		result_data['rom'] = "4 GB"
+		result_data['os'] = "openwrt"
+
         client.getStatus(req.query.name).then(result=>{
 			result.data_upload = result.data_upload? Boolean(result.data_upload): false;
 			result.stat_upload = result.stat_upload? Boolean(result.stat_upload): false;
