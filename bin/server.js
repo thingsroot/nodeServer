@@ -3,7 +3,7 @@ const app = express.Router();
 const axios = require('axios');
 const http = require('../common/http');
 const path = 'http://ioe.thingsroot.com/api/v1';
-const errMessage = {message: 'error', ok: false}
+const errMessage = {error: 'Unknown Error', ok: false}
 var proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 var options = {
     target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
@@ -128,7 +128,7 @@ app.get('/store_configurations_list',function (req, response) {
                 sendGetAjax('/configurations.versions.latest?conf=' + item[index], req.headers).then(res=>{
                     list && list.length > 0 && list.map((v)=>{
                         if (v.name === item[index]) {
-                            v['templateList'] = res.data.data;
+                            v['latest_version'] = res.data.data;
                         }
                     });
                     getLatestVersion(index + 1, item, req.headers)
@@ -176,7 +176,7 @@ app.get('/applications_details', function (req, response) {
 });
 
 //我的应用下对应的模板列表   okokok
-app.get('/user_configuration_list', function(req, response){
+app.get('/user_configurations_list', function(req, response){
     sendGetAjax('/configurations.list?conf_type=Template', req.headers).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         let obj = [];

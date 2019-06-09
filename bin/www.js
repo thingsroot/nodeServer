@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const http = require('../common/http');
-const errMessage = {message: 'error', ok: false};
+const errMessage = {error: 'Unknown Error', ok: false};
 const path = 'http://ioe.thingsroot.com/api/v1';
 const server = require('./server');
 const client = require('./redis');
@@ -189,13 +189,13 @@ app.get('/gateway_online_record', function(req, response){
 
 
 // redis获取网关列表
-app.get('/gateway_list', function(req, response){
+app.get('/gateways_list', function(req, response){
     const arr = [];
     let cookie = [];
     function queryGateway (index, item) {
         if (index >= item.length){
             response.setHeader('set-cookie', cookie)
-            response.send({message: arr, ok: true})
+            response.send({data: arr, ok: true})
         } else {
             http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
@@ -286,7 +286,7 @@ app.post('/gateways_upgrade', function(req, response){
 //     function getGatewaysList (index, item){
 //         if (index >= item.length){
 
-//             response.send({message: arr, status: 'OK'})
+//             response.send({data: arr, status: 'OK'})
 //             return false;
 //         }
 //         axios.all(
@@ -385,24 +385,32 @@ app.get('/gateways_applications_list', function (req, response) {
 app.get('/gateways_read', function(req, response){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
+		if (!res.data.ok) {
+			response.send(res.data)
+			return
+		}
+
+		let result_data = res.data.data;
+		result_data.use_beta = result_data.use_beta ? Boolean(result_data.use_beta) : false
+
         client.getStatus(req.query.name).then(result=>{
+			result.data_upload = result.data_upload? Boolean(result.data_upload): false;
+			result.stat_upload = result.stat_upload? Boolean(result.stat_upload): false;
+
             client.getNetManager(req.query.name).then(data=>{
                 const newData = Object.values(data);
-                result.Net_Manager = false;
-                result.p2p_vpn = false;
-                res.data.data.use_beta = res.data.data.use_beta ? Boolean(res.data.data.use_beta) : false;
-                result.data_upload = result.data_upload? Boolean(result.data_upload): false;
-                result.stat_upload = result.stat_upload? Boolean(result.stat_upload): false;
+                result_data.Net_Manager = false;
+                result_data.p2p_vpn = false;
                 newData.map(item=>{
                     if (item.name === 'network_uci'){
-                        result.Net_Manager = true;
+                        result_data.Net_Manager = true;
                     }
                     if (item.name === 'frpc'){
-                        result.p2p_vpn = true;
+                        result_data.p2p_vpn = true;
                     }
                 });
-                const Obj = Object.assign(result, res.data.data);
-                response.send(Obj)
+
+                response.send({ok: true, data: Object.assign(result_data, {data: result})})
             })
         })
     })
@@ -456,7 +464,7 @@ app.get('/gateways_app_list', function(req, response){
                         item.devs_len = 0;
                     }
                 })
-                response.send({message: arr, ok: true})
+                response.send({data: arr, ok: true})
                 return false;
             } else {
                 name.push(item[index].name)
@@ -605,7 +613,7 @@ app.get('/gateways_historical_data', function(req, response){
                         vsn: obj.sn
                     })
                 })
-                response.send({message: data})
+                response.send({data: data, ok: true})
             }, obj.group_time_span)
     })
 })
@@ -653,7 +661,7 @@ app.get('/gateways_dev_list', function(req, response){
     const arr = [];
     function getDevicesList (index, item){
         if (index >= item.length){
-            response.send({message: arr, ok: true})
+            response.send({data: arr, ok: true})
             return false;
         } else {
             http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
@@ -740,15 +748,12 @@ app.get('/store_list', function(req, response){
 })
 // 安装APP okokok
 app.post('/gateways_applications_install', function(req, response){
-    axios({
-        url: path + '/gateways.applications.install',
-        method: 'POST',
-        data: req.body,
-        headers: req.headers
-    }).then(res=>{
+    sendPostAjax('/gateways.applications.install', req.headers, req.body).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send({data: res.data, ok: true})
-    })
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)    
+	})
 })
 app.post('/gateways_applications_remove', function(req, response){
     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
