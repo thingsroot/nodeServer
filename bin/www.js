@@ -397,24 +397,23 @@ app.get('/gateways_read', function(req, response){
 		result_data['ram'] = "256 MB"
 		result_data['rom'] = "4 GB"
 		result_data['os'] = "openwrt"
+		result_data.ioe_network = false;
+		result_data.ioe_frpc = false;
 
         client.getStatus(req.query.name).then(result=>{
 			result.data_upload = result.data_upload? Boolean(result.data_upload): false;
 			result.stat_upload = result.stat_upload? Boolean(result.stat_upload): false;
 
             client.getNetManager(req.query.name).then(data=>{
-                const newData = Object.values(data);
-                result_data.Net_Manager = false;
-                result_data.p2p_vpn = false;
-                newData.map(item=>{
-                    if (item.name === 'network_uci'){
-                        result_data.Net_Manager = true;
-                    }
-                    if (item.name === 'frpc'){
-                        result_data.p2p_vpn = true;
-                    }
-                });
+				for (let [inst_name, inst_data] of Object.entries(data)) {
+					if (inst_name === 'ioe_frpc' && inst_data.name === 'frpc') {
+                        result_data.ioe_frpc = true;
+					}
+					if (inst_name === 'ioe_network' && inst_data.name === 'network_uci') {
+                        result_data.ioe_network = true;
+					}
 
+				}
                 response.send({ok: true, data: Object.assign(result_data, {data: result})})
             })
         })
