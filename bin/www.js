@@ -573,10 +573,10 @@ app.get('/applications_versions_list', function(req, response){
 })
 
 // 获取网关设备SN
-app.get('/gateways_dev_len', function(req, response){
+app.get('/gateways_devices_list', function(req, response){
     sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data.data);
+        response.send(res.data);
     }).catch(err=>{
         response.send(err)
     })
