@@ -406,6 +406,7 @@ app.get('/gateways_read', function(req, response){
 
             client.getNetManager(req.query.name).then(data=>{
 				for (let [inst_name, inst_data] of Object.entries(data)) {
+					console.log(inst_name, inst_data.name)
 					if (inst_name === 'ioe_frpc' && inst_data.name === 'frpc') {
                         result_data.ioe_frpc = true;
 					}
@@ -593,32 +594,40 @@ app.get('/gateways_dev_data', function(req, response){
 app.get('/gateways_historical_data', function(req, response){
     const obj = req.query;
     client.getInfluxDB(obj.sn).then(index=>{
-        let count = '';
-        let counts = '';
-        if (obj.vt === 'float') {
-            count = 'value=' + obj.value_method;
-            counts = 'value';
+        let field = '';
+        if (obj.vt === 'string') {
+            field = 'string_value';
         } else if(obj.vt === 'int') {
-            count = 'int_value=' + obj.value_method;
-            counts = 'int_value';
+            field = 'int_value';
         } else {
-            count = 'string_value=' + obj.value_method;
-            counts = 'string_value';
+            field = 'value';
         }
-            InfluxClient.query(index, obj.tag, obj.time_condition +' and "device"!="' + obj.vsn + '"', counts, function(result){
-                const arr = result.results[0].series ? result.results[0].series[0].values : [];
-                const data = [];
-                arr.map(item=>{
-                    data.push({
-                        name: obj.tag,
-                        quality: 0,
-                        time: item[0],
-                        value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
-                        vsn: obj.sn
-                    })
-                })
-                response.send({data: data, ok: true})
-            }, obj.group_time_span)
+		let func = obj.value_method && obj.value_method !== 'raw' ? obj.value_method : undefined
+		let group_time = func ? `time(${obj.group_time_span})` : undefined
+		let conditions = {
+			device: obj.vsn,
+		}
+		let set = {
+			start: obj.start,
+		}
+		if (obj.end !== undefined) {
+			set['end'] = obj.end
+		}
+
+		InfluxClient.query(index, obj.tag, func, field, conditions, group_time, set, function(result){
+			const arr = result.results[0].series ? result.results[0].series[0].values : [];
+			const data = [];
+			arr.map(item=>{
+				data.push({
+					name: obj.tag,
+					quality: 0,
+					time: item[0],
+					value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
+					vsn: obj.sn
+				})
+			})
+			response.send({data: data, ok: true})
+		})
     })
 })
 

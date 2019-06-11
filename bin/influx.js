@@ -14,15 +14,33 @@ InfluxClient.getClient = function(database) {
 	return client;
 }
 
-InfluxClient.query = function(database, table, condition, set, callback, time) {
+InfluxClient.query = function(database, measurement, func, field, conditions, group_time, set, callback) {
     var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
     var client = new Influx(dblink);
     client.setMaxListeners(10)
-    client.query(table).where(condition).addGroup(time).addFunction(set).set(set)
-        .then((data) => {
-            var sql = client.query(table).where(condition).addGroup(time).addFunction(set).set(set).toString();
-            callback(data);
-        }).catch(console.error);
+	console.log(func, field, conditions, group_time, set)
+	const reader = client.query(measurement)
+
+	if (func !== undefined) {
+		reader.addFunction(func, field)
+	} else {
+		reader.addField(field)
+	}
+
+	if (conditions !== undefined) {
+		reader.where(conditions)
+	}
+	if (set !== undefined) {
+		reader.set(set)
+	}
+	if (group_time !== undefined) {
+		reader.addGroup(group_time)
+	}
+	console.log(reader.toString())
+
+    reader.then((data) => {
+		callback(data);
+	}).catch(console.error);
 };
 
 InfluxClient.queryCount = function(database, table, condition, count, callback, time) {
