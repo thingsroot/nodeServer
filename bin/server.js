@@ -338,27 +338,28 @@ app.post('/user_update_password', function (req, response) {
 });
 
 //平台事件确认消息   okokok
-app.post('/activities_dispose', function(req, respones){
+app.post('/activities_dispose', function(req, response){
     sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
     }).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        respones.send(res.data);
+        response.send(res.data);
     }).catch(err=>{
-        respones.send(errMessage)
+        response.send(errMessage)
     })
 });
 //设备事件确认消息 okokok
-app.post('/events_dispose', function(req, respones){
+app.post('/events_dispose', function(req, response){
     sendPostAjax('/'+ req.body.category +'.events.dispose', req.headers, {
         events: req.body.events,
         disposed: req.body.disposed
     }).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        respones.send(res.data);
+        response.send(res.data);
     }).catch(err=>{
-        respones.send(errMessage)
+		console.log(err)
+        response.send({ok: false, error: err})
     })
 });
 
@@ -394,12 +395,12 @@ app.post('/configurations_create', function(req, response){
 });
 
 //删除模板   okokok
-app.post('/configurations_remove', function(req, respones){
+app.post('/configurations_remove', function(req, response){
     sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        respones.send(res.data)
+        response.send(res.data)
     }).catch(err=>{
-        respones.send(errMessage)
+        response.send(errMessage)
     })
 });
 
@@ -419,7 +420,7 @@ app.post('/configurations_update', function (req, response) {
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     }).catch(err=>{
-        respones.send(errMessage)
+        response.send(errMessage)
     })
 });
 
