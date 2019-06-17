@@ -259,13 +259,30 @@ app.get('/platform_activities_lists', function (req, response) {
         },
         headers: req.headers
     }).then(res=>{
-        data['list'] = res.data;
-        sendGetAjax('/'+ req.query.category +'.activities.count?name=' + req.query.name, req.headers).then(res=>{
+		if (res.data.ok) {
+			data['list'] = res.data.data;
+		} else {
+			data['list'] = []
+		}
+		let query = {
+			name: req.query.name,
+            filters: JSON.parse(req.query.filters)
+		}
+		axios({
+			url: path + '/'+ req.query.category +'.activities.count',
+			method: 'GET',
+			data: query, 
+			headers: req.headers
+		}).then(res=>{
 			response.setHeader('set-cookie', res.headers['set-cookie'])
             data['count'] = res.data.data;
             response.send({data: data, ok: true})
-        })
-    }).catch(()=>{
+		}).catch( (err) => {
+			console.log(err)
+            response.send(errMessage)
+		})
+    }).catch((err)=>{
+		console.log(err)
         response.send(errMessage)
     })
 });
@@ -286,6 +303,8 @@ app.get('/device_events_list', function (req, response) {
     }).then(res=>{
 		if (res.data.ok) {
 			data['list'] = res.data.data;
+		} else {
+			data['list'] = []
 		}
 		let query = {
 			name: req.query.name,
