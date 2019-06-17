@@ -406,7 +406,7 @@ app.get('/gateways_read', function(req, response){
 
             client.getNetManager(req.query.name).then(data=>{
 				for (let [inst_name, inst_data] of Object.entries(data)) {
-					console.log(inst_name, inst_data.name)
+					//console.log(inst_name, inst_data.name)
 					if (inst_name === 'ioe_frpc' && inst_data.name === 'frpc') {
                         result_data.ioe_frpc = true;
 					}
