@@ -104,8 +104,16 @@ app.get('/applications_read', function(req, response){
 					http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
 				]
 			).then(axios.spread(function (versionList, versionLatest) {
-				obj['versionList'] = versionList.data;
-				obj['versionLatest'] = versionLatest.data;
+				if (versionList.data.ok) {
+					obj['versionList'] = versionList.data.data;
+				} else {
+					obj['versionList'] = [];
+				}
+				if (versionLatest.data.ok) {
+					obj['versionLatest'] = versionLatest.data.data;
+				} else {
+					obj['versionLatest'] = 0;
+				}
 				response.send({data: obj, ok: true});
 			}));
 		} else {
