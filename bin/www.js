@@ -722,6 +722,16 @@ app.post('/gateways_data_enable', function(req, response){
         response.send(errMessage)
     })
 })
+// 数据临时上送
+app.post('/gateways_enable_data_one_short', function(req, response){
+	sendPostAjax('/gateways.enable_data_one_short', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+
+})
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, response){
     sendPostAjax('/gateways.beta.enable', req.headers, req.body).then(res=>{
