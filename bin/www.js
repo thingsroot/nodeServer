@@ -435,10 +435,12 @@ app.get('/gateways_app_list', function(req, response){
                 } else {
                     http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
 						response.setHeader('set-cookie', res.headers['set-cookie'])
-                        const data = res.data.data;
-                        data.meta.sn = item[index];
-                        arr.push(data);
-                        getDevicesList(index + 1, item, req.headers)
+						if (res.data.ok) {
+							const data = res.data.data;
+							data.meta.sn = item[index];
+							arr.push(data);
+							getDevicesList(index + 1, item, req.headers)
+						}
                     })
                 }
             }
@@ -477,15 +479,17 @@ app.get('/gateways_app_list', function(req, response){
                     http.get(path + '/store.read?name=' + item[index].name, req.headers),
                     http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers})
                 ]).then(axios.spread((res, version)=>{
-                    if(!res.data.error){
-                        item[index].data = res.data;
-                        if (item[index].data.data.icon_image !== undefined){
-                            item[index].data.data.icon_image = 'http://ioe.thingsroot.com' + item[index].data.data.icon_image;
+                    if(res.data.ok){
+                        item[index].data = res.data.data;
+                        if (item[index].data.icon_image !== undefined){
+                            item[index].data.icon_image = 'http://ioe.thingsroot.com' + item[index].data.icon_image;
                         } else {
-                            item[index].data.data.icon_image = 'http://ioe.thingsroot.com/assets/app_center/img/logo.png';
+                            item[index].data.icon_image = 'http://ioe.thingsroot.com/assets/app_center/img/logo.png';
                         }
                     }
-                    item[index].latestVersion = version.data.data;
+					if (version.data.ok) {
+						item[index].latestVersion = version.data.data;
+					}
                     arr.push(item[index]);
                     getAppList(index + 1, item);
                 }))
@@ -493,19 +497,23 @@ app.get('/gateways_app_list', function(req, response){
         }
         sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
             response.setHeader('set-cookie', res.headers['set-cookie'])
-            const data = res.data.data;
-            const keys = Object.keys(data)
-            const values = Object.values(data)
-            values.map((item, key)=>{
-              if (item.running){
-                  item.status = 'running';
-                  item.running = new Date(parseInt(item.running) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ')
-              } else {
-                  item.status = 'stoped';
-              }
-            item.inst_name = keys[key];
-            })
-                getAppList(0, values)
+			if (res.data.ok) {
+				const data = res.data.data;
+				const keys = Object.keys(data)
+				const values = Object.values(data)
+				values.map((item, key)=>{
+					if (item.running){
+						item.status = 'running';
+						item.running = new Date(parseInt(item.running) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ')
+					} else {
+						item.status = 'stoped';
+					}
+					item.inst_name = keys[key];
+				})
+				getAppList(0, values)
+			} else {
+				response.send(res.data)
+			}
         }).catch(err=>{
             response.send(err)
         })
