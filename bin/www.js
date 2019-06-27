@@ -477,8 +477,9 @@ app.get('/gateways_app_list', function(req, response){
                 name.push(item[index].name)
                 axios.all([
                     http.get(path + '/store.read?name=' + item[index].name, req.headers),
-                    http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers})
-                ]).then(axios.spread((res, version)=>{
+                    http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers}),
+                    http.get(path + '/applications.versions.beta?app=' + item[index].name + '&version=' + item[index].version, {headers: req.headers})
+                ]).then(axios.spread((res, version, beta)=>{
                     if(res.data.ok){
                         item[index].data = res.data.data;
                         if (item[index].data.icon_image !== undefined){
@@ -489,6 +490,9 @@ app.get('/gateways_app_list', function(req, response){
                     }
 					if (version.data.ok) {
 						item[index].latestVersion = version.data.data;
+					}
+					if (beta.data.ok) {
+						item[index].beta = beta.data.data
 					}
                     arr.push(item[index]);
                     getAppList(index + 1, item);
