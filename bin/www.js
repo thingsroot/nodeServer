@@ -736,6 +736,26 @@ app.post('/gateways_enable_data_one_short', function(req, response){
     })
 
 })
+// 数据快照
+app.post('/gateways_data_snapshot', function(req, response){
+	sendPostAjax('/gateways.data_snapshot', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+})
+// 数据缓存刷新
+app.post('/gateways_data_flush', function(req, response){
+	sendPostAjax('/gateways.data_flush', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+
+})
+
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, response){
     sendPostAjax('/gateways.beta.enable', req.headers, req.body).then(res=>{
