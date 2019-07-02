@@ -393,10 +393,12 @@ app.get('/gateways_read', function(req, response){
 		let result_data = res.data.data;
 		result_data.use_beta = result_data.use_beta ? Boolean(result_data.use_beta) : false
 
+		/*
 		result_data['cpu'] = "imx6ull 528MHz"
 		result_data['ram'] = "256 MB"
 		result_data['rom'] = "4 GB"
 		result_data['os'] = "openwrt"
+		*/
 		result_data.ioe_network = false;
 		result_data.ioe_frpc = false;
 
@@ -483,9 +485,9 @@ app.get('/gateways_app_list', function(req, response){
                     if(res.data.ok){
                         item[index].data = res.data.data;
                         if (item[index].data.icon_image !== undefined){
-                            item[index].data.icon_image = 'http://ioe.thingsroot.com' + item[index].data.icon_image;
+                            item[index].data.icon_image = item[index].data.icon_image;
                         } else {
-                            item[index].data.icon_image = 'http://ioe.thingsroot.com/assets/app_center/img/logo.png';
+                            item[index].data.icon_image = '/assets/app_center/img/logo.png';
                         }
                     }
 					if (version.data.ok) {
