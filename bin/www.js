@@ -192,7 +192,7 @@ app.get('/gateway_online_record', function(req, response){
 app.get('/gateways_list', function(req, response){
     const arr = [];
     let cookie = [];
-    function queryGateway (index, item) {
+    function queryGateway (index, item, shared) {
         if (index >= item.length){
             response.setHeader('set-cookie', cookie)
             response.send({data: arr, ok: true})
@@ -201,18 +201,21 @@ app.get('/gateways_list', function(req, response){
 				response.setHeader('set-cookie', res.headers['set-cookie'])
 				if (res.data.ok) {
 					let data = res.data.data;
+					if (shared && shared.indexOf(item[index]) >= 0) {
+						data['is_shared'] = true
+					}
 					client.getDevLen(item[index]).then(DevLen=>{
 						data.device_devs_num = DevLen;
 						client.getAppLen(item[index]).then(AppLen=>{
 							data.device_apps_num = AppLen;
 							data.last_updated = data.modified.slice(0, -7)
 							arr.push(data)
-							queryGateway(index + 1, item)
+							queryGateway(index + 1, item, shared)
 						})
 					})
 				} else {
 					console.log("Read gateway failed", item[index])
-					queryGateway(index + 1, item)
+					queryGateway(index + 1, item, shared)
 				}
             })
         }
@@ -223,15 +226,15 @@ app.get('/gateways_list', function(req, response){
         const company_devices = res.data.data.company_devices;
         const shared_devices = res.data.data.shared_devices;
         const private_devices = res.data.data.private_devices;
-        if (company_devices && company_devices.length > 0 && shared_devices && shared_devices.length > 0){
-            data = company_devices[0].devices.concat(private_devices).concat(shared_devices[0].devices)
-        } else if (company_devices && company_devices.length > 0 && shared_devices.length <= 0) {
-            data = company_devices[0].devices.concat(private_devices)
-        } else if (shared_devices && shared_devices.length > 0 && company_devices.length <= 0) {
-            data = shared_devices[0].devices.concat(private_devices)
-        } else {
-            data = private_devices
-        }
+		data = private_devices ? private_devices : [];
+		let shared = []
+		for (let group of shared_devices) {
+			data = data.concat(group.devices)
+			shared = shared.concat(group.devices)
+		}
+		for (let group of company_devices) {
+			data = data.concat(group.devices)
+		}
             
         function promise () {
             const ONLINE = [];
@@ -264,14 +267,14 @@ app.get('/gateways_list', function(req, response){
             })
         }
         promise().then(res=>{
-            const count = res.ONLINE.concat(res.OFFLINE.concat(res.NullData))
+            const all = res.ONLINE.concat(res.OFFLINE.concat(res.NullData))
             const status = req.query.status;
             if (status === 'online'){
-                queryGateway(0, res.ONLINE)
+                queryGateway(0, res.ONLINE, shared)
             } else if (status === 'offline'){
-                queryGateway(0, res.OFFLINE)
+                queryGateway(0, res.OFFLINE, shared)
             } else {
-                queryGateway(0, count)
+                queryGateway(0, all, shared)
             }
         })
     })
