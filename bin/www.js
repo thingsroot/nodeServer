@@ -614,6 +614,7 @@ app.get('/gateways_dev_data', function(req, response){
 })
 // 获取网关历史数据
 app.get('/gateways_historical_data', function(req, response){
+	// FIXME: Check gateway permission before read history data
     const obj = req.query;
     client.getInfluxDB(obj.sn).then(index=>{
         let field = '';

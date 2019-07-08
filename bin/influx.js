@@ -1,21 +1,27 @@
 const Influx = require('influxdb-nodejs');
+const config = require('../config/env');
+
+const conf = config.influxdb;
+/*
 const config = {
     user: 'root',
     password: 'root',
     port: 8086,
     host: '172.30.0.187'
 }
+*/
+console.log('influxdb conf:', conf);
 
 InfluxClient = function() {};
 
 InfluxClient.getClient = function(database) {
-    var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
+    var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
 	return client;
 }
 
 InfluxClient.query = function(database, measurement, func, field, conditions, group_time, set, callback) {
-    var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
+    var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
     client.setMaxListeners(10)
 	console.log(func, field, conditions, group_time, set)
@@ -44,7 +50,7 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
 };
 
 InfluxClient.queryCount = function(database, table, condition, count, callback, time) {
-    var dblink = 'http://' + config.user + ':' + config.password + '@' + config.host + ':' + config.port + '/' + database;
+    var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
     var reader = client.query(table);
     reader = reader.where(condition);

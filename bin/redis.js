@@ -1,11 +1,21 @@
 var redis = require('redis');
+const config = require('../config/env');
 
-var client = redis.createClient(6380, '172.30.0.187')
+/*
+const config = {
+	port: 6380,
+	host: '172.30.0.187'
+}
+*/
+const conf = config.redis;
+console.log('redis conf:', conf);
+
+var client = redis.createClient(conf.port, conf.host)
 
  
 client.on("error", function (err) {
     client.quit()
-    client = redis.createClient(6380, '172.30.0.187');
+    client = redis.createClient(conf.port, conf.host);
 });
 
 client.getGatewayStatus = (sn)=>{
