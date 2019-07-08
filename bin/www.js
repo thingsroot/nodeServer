@@ -199,16 +199,21 @@ app.get('/gateways_list', function(req, response){
         } else {
             http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
-                let data = res.data.data;
-                client.getDevLen(item[index]).then(DevLen=>{
-                    data.device_devs_num = DevLen;
-                    client.getAppLen(item[index]).then(AppLen=>{
-                        data.device_apps_num = AppLen;
-                        data.last_updated = data.modified.slice(0, -7)
-                        arr.push(data)
-                        queryGateway(index + 1, item)
-                    })
-                })
+				if (res.data.ok) {
+					let data = res.data.data;
+					client.getDevLen(item[index]).then(DevLen=>{
+						data.device_devs_num = DevLen;
+						client.getAppLen(item[index]).then(AppLen=>{
+							data.device_apps_num = AppLen;
+							data.last_updated = data.modified.slice(0, -7)
+							arr.push(data)
+							queryGateway(index + 1, item)
+						})
+					})
+				} else {
+					console.log("Read gateway failed", item[index])
+					queryGateway(index + 1, item)
+				}
             })
         }
     }
