@@ -518,7 +518,6 @@ app.get('/gateways_app_list', function(req, response){
 				values.map((item, key)=>{
 					if (item.running){
 						item.status = 'running';
-						item.running = new Date(parseInt(item.running) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ')
 					} else {
 						item.status = 'stoped';
 					}
