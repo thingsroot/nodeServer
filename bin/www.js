@@ -197,7 +197,7 @@ app.get('/gateways_list', function(req, response){
             response.setHeader('set-cookie', cookie)
             response.send({data: arr, ok: true})
         } else {
-            http.get(path + '/gateways.read?name=' + item[index], {headers: req.headers}).then(res=>{
+            http.get(path + '/gateways.read?name=' + escape(item[index]), {headers: req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
 				if (res.data.ok) {
 					let data = res.data.data;
