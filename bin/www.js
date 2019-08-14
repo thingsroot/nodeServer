@@ -634,6 +634,8 @@ app.get('/gateways_historical_data', function(req, response){
 		}
 		if (obj.end !== undefined) {
 			set['end'] = obj.end
+		} else {
+			set['end'] = '-0m' /* In case there is any timestamp bigger than real time */
 		}
 
 		InfluxClient.query(index, obj.tag, func, field, conditions, group_time, set, function(result){
