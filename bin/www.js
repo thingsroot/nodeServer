@@ -430,6 +430,15 @@ app.get('/gateways_read', function(req, response){
         })
     })
 })
+// 获取应用最新版本号
+app.get('/gateways_app_version_latest', function(req, response){
+    sendGetAjax('/applications.versions.latest', req.headers, req.query).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(()=>{
+        response.send(errMessage)
+    })
+})
 // 获取App列表
 app.get('/gateways_app_list', function(req, response){
     client.getMeta(req.query.gateway)
