@@ -104,6 +104,15 @@ app.get('/user_csrf_token', function(req, response){
     })
 })
 // 创建Accesskey
+app.post('/user_token_create', function(req, response){
+    sendPostAjax('/user.token.create', req.headers).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+})
+// 获取Accesskey
 app.get('/user_token_read', function(req, response){
     sendGetAjax('/user.token.read', req.headers).then(res=>{
         response.setHeader('set-cookie', res.headers['set-cookie'])
