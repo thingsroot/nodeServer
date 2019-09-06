@@ -370,6 +370,15 @@ app.get('/applications_forks_list', function(req, response){
         response.send(errMessage)
     })
 })
+// 删除我的应用
+app.post('/my_applications_remove', function(req, response){
+    sendPostAjax('/applications.remove', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        response.send(errMessage)
+    })
+})
 // 删除设备安装应用
 app.post('/applications_remove', function(req, response){
     sendPostAjax('/gateways.applications.remove', req.headers, req.body).then(res=>{
