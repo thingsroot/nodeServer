@@ -14,6 +14,19 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(server);
+
+const getIp = function(req) {
+    let ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddres || req.socket.remoteAddress || '';
+    if(ip.split(',').length>0){
+        ip = ip.split(',')[0];
+    }
+    return ip;
+}
+app.use(function(req, res, next) {
+    const ip = getIp(req)
+    req.headers['x-forwarded-for'] = ip;
+    next()
+})
 // 封装ajax get方式
 function sendGetAjax (url, headers, query){
     let pathname = ''; 
@@ -123,6 +136,7 @@ app.get('/user_token_read', function(req, response){
 })
 // 更新Accesskey
 app.post('/user_token_update', function(req, response){
+    console.log(req)
     sendPostAjax('/user.token.update', req.headers, req.body).then(res=>{
         response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
