@@ -272,6 +272,8 @@ app.get('/gateways_list', function(req, response){
                                 OFFLINE: OFFLINE,
                                 NullData: NullData
                             })
+                        } else {
+                            reject(null)
                         }
                     } else {
                         client.getGatewayStatus(item[index]).then(status=>{
@@ -492,6 +494,8 @@ app.get('/gateways_app_list', function(req, response){
 							arr.push(data);
 							getDevicesList(index + 1, item, req.headers)
 						}
+                    }).catch(err=>{
+                        reject(err)
                     })
                 }
             }
