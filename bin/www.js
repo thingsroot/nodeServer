@@ -25,6 +25,8 @@ const getIp = function(req) {
 app.use(function(req, res, next) {
     const ip = getIp(req)
     req.headers['x-forwarded-for'] = ip;
+    req.headers['x-forwarded-host'] = req.hostname;
+    req.headers['X-Forwarded-Proto'] = req.protocol;
     next()
 })
 // 封装ajax get方式
