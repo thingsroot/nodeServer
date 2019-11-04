@@ -42,8 +42,10 @@ client.getStatus = (sn)=>{
                 obj = Object(result);
                 for (key in obj){
                     const value = JSON.parse(obj[key])
-                    const keys = key.split('/')[0];
-                    newObj[keys] = value[1];
+                    const keys = key.split('/');
+                    if (keys[1] === 'value') {
+                        newObj[keys[0]] = value[1];
+                    }
                 }
                 resolve(newObj)
         })

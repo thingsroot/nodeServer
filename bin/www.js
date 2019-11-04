@@ -69,7 +69,6 @@ function sendPostAjax (url, headers, body){
         })
     })
 }
-
 // 转接login 未作处理
 app.post('/user_login', function(req, response){
      sendPostAjax('/user.login', req.headers, req.body).then(res=>{
