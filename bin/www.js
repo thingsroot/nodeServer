@@ -988,7 +988,7 @@ app.get('/companies_groups_list', function(req, response){
             response.send({ok: true, data: data})
         }
         if (ind <= arr.length - 1) {
-            sendGetAjax('/companies.groups.read?name=' + arr[ind - 1], req.headers).then(ajax=>{
+            sendGetAjax('/companies.groups.read?name=' + arr[ind], req.headers).then(ajax=>{
                 if (ajax.data.ok) {
                     data.push(ajax.data.data)
                     MapGetGroupsList(arr, ind + 1, res)
@@ -1175,7 +1175,6 @@ app.post('/companies_users_update', function(req, response){
 // 查询账号信息
 app.get('/companies_users_read', function(req, response){
     sendGetAjax('/companies.users.read', req.headers, req.query).then(res=>{
-        console.log(res)
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     })
