@@ -75,6 +75,7 @@ app.post('/user_login', function(req, response){
         response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
      }).catch(err=>{
+         console.log(err)
          response.send(errMessage)
      })
 })
@@ -1036,6 +1037,7 @@ app.post('/companies_update', function(req, response){
 // 查询公司信息
 app.get('/companies_read', function(req, response){
     req.query.name = encodeURI(req.query.name)
+    console.log(req.query)
     sendGetAjax('/companies.read', req.headers, req.query).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data);
@@ -1173,6 +1175,7 @@ app.post('/companies_users_update', function(req, response){
 // 查询账号信息
 app.get('/companies_users_read', function(req, response){
     sendGetAjax('/companies.users.read', req.headers, req.query).then(res=>{
+        console.log(res)
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     })
@@ -1250,6 +1253,62 @@ app.get('/companies_requisition_read', function(req, response){
 // 取消公司注册申请
 app.post('/companies_requisition_remove', function(req, response){
     sendPostAjax('/companies.requisition.remove', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    })
+})
+// 获取应用市场标签列表
+app.get('/store_tags_list', function(req, response){
+    sendGetAjax('/store.tags.list', req.headers).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    })
+})
+// 获取应用评论列表
+app.get('/store_reviews_list', function(req, response){
+    sendGetAjax('/store.reviews.list', req.headers, req.query).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+    })
+})
+// 获取应用市场讨论列表
+app.get('/store_comments_list', function(req, response){
+    sendGetAjax('/store.comments.list', req.headers, req.query).then(res=>{
+        response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+    })
+})
+// 创建应用评论问题
+app.post('/store_comments_create', function(req, response){
+    sendPostAjax('/store.comments.create', req.headers, req.body).then(res=>{
+        console.log(res)
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    }).catch(err=>{
+        console.log(err)
+    })
+})
+// 创建应用评论问题
+app.post('/store_reviews_create', function(req, response){
+    sendPostAjax('/store.reviews.create', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    })
+})
+// 删除应用评论问题
+app.post('/store_reviews_remove', function(req, response){
+    sendPostAjax('/store.reviews.remove', req.headers, req.body).then(res=>{
+		response.setHeader('set-cookie', res.headers['set-cookie'])
+        response.send(res.data)
+    })
+})
+// 删除应用评论问题
+app.post('/store_comments_remove', function(req, response){
+    sendPostAjax('/store.comments.remove', req.headers, req.body).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data)
     })
