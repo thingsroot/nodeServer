@@ -8,6 +8,7 @@ const companies = require('./companies');
 const gateways = require('./gateway');
 const applications = require('./applications');
 const user = require('./user')
+const port = 8881;
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 const getIp = function(req) {
@@ -31,6 +32,6 @@ app.use(gateways)
 app.use(applications)
 app.use(user)
 
-app.listen(8881, '127.0.0.1', function(){
-    console.log('this port is 8881....')
+app.listen(port, '127.0.0.1', function(){
+    console.log('this port is ' + port + '....')
 })

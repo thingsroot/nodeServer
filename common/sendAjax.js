@@ -6,12 +6,15 @@ function sendGetAjax (url, headers, query, response, WhetherToSend){
     if (query){
         let str = '';
         const name = Object.keys(query);
-        const querys = Object.values(query);
-        name.map((item, key)=>{
-            key === 0 ? str += (item + '=' + querys[key]) : str += ('&' + item + '=' + querys[key])
-            
-        })
-        pathname = path + url + '?' + str;
+        if (name.length === 0) {
+            pathname = path + url;
+        } else {
+            const querys = Object.values(query);
+            name.map((item, key)=>{
+                key === 0 ? str += (item + '=' + querys[key]) : str += ('&' + item + '=' + querys[key])
+            })
+            pathname = path + url + '?' + str;
+        }
     } else {
         pathname = path + url;
     }
