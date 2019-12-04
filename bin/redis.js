@@ -68,7 +68,6 @@ client.getAppLen = (sn)=>{
     })
 }
 client.getDevLen = (sn)=>{
-    // console.log(sn)
     client.select(11);
     return new Promise((resolve, reject)=>{
         let length = 0;

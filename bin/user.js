@@ -3,78 +3,38 @@ const app = express.Router();
 const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 // 转接login 未作处理
 app.post('/user_login', function(req, response){
-    sendPostAjax('/user.login', req.headers, req.body).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/user.login', req.headers, req.body, response, true)
 })
 
 // 转接logout 未作处理
 app.post('/user_logout', function(req, response){
-    sendPostAjax('/user.logout', req.headers, req.body).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/user.logout', req.headers, req.body, response, true)
 })
 
 // 注册账户 未作处理
 app.post('/user_create', function(req, response){
-   sendPostAjax('/user.create', req.headers, req.body).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(err=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(errMessage)
-   })
+   sendPostAjax('/user.create', req.headers, req.body, response, true)
 })
 // 忘记密码 未做处理
 app.post('/user_reset_password', function(req, response){
-   sendPostAjax('/user.reset_password', req.headers, req.body).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(err=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(err)
-   })
+   sendPostAjax('/user.reset_password', req.headers, req.body, response, true)
 })
 
 // 重新获取csrftoken
 app.get('/user_csrf_token', function(req, response){
-   sendGetAjax('/user.csrf_token', req.headers).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data);
-   })
+   sendGetAjax('/user.csrf_token', req.headers, req.query, response, true)
 })
 // 创建Accesskey
 app.post('/user_token_create', function(req, response){
-   sendPostAjax('/user.token.create', req.headers).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(err=>{
-       response.send(errMessage)
-   })
+   sendPostAjax('/user.token.create', req.headers, req.body, response, true)
 })
 // 获取Accesskey
 app.get('/user_token_read', function(req, response){
-   sendGetAjax('/user.token.read', req.headers).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(err=>{
-       response.send(errMessage)
-   })
+   sendGetAjax('/user.token.read', req.headers, req.query, response, true)
 })
 // 更新Accesskey
 app.post('/user_token_update', function(req, response){
-   sendPostAjax('/user.token.update', req.headers, req.body).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(()=>{
-       response.send(errMessage)
-   })
+   sendPostAjax('/user.token.update', req.headers, req.body, response, true)
 })
 // 获取虚拟网关列表
 app.get('/user_virtual_gateways_list', function(req, response){
@@ -105,21 +65,11 @@ app.get('/user_virtual_gateways_list', function(req, response){
 })
 // 创建一个新的虚拟网关
 app.post('/user_virtual_gateways_create', function(req, response){
-   sendPostAjax('/user.virtual_gateways.create', req.headers).then(res=>{
-       response.setHeader('set-cookie', res.headers['set-cookie'])
-       response.send(res.data)
-   }).catch(()=>{
-       response.send(errMessage)
-   })
+   sendPostAjax('/user.virtual_gateways.create', req.headers, req.body, response, true)
 })
 //个人信息   ok
 app.get('/user_read', function (req, response) {
-    sendGetAjax('/user.read', req.headers, req.query).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(()=>{
-        response.send(errMessage)
-    })
+    sendGetAjax('/user.read', req.headers, req.query, response, true)
 });
 
 app.get('/user_groups_list', function (req, response) {
@@ -170,12 +120,7 @@ app.get('/user_configurations_list', function(req, response){
 });
 //修改密码   小崔
 app.post('/user_update_password', function (req, response) {
-    sendPostAjax('/user.update_password', req.headers, req.body).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/user.update_password', req.headers, req.body, response, true)
 });
 
 module.exports  = app;

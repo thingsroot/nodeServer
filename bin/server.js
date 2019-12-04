@@ -140,36 +140,19 @@ app.post('/activities_dispose', function(req, response){
     sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
-    }).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data);
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    }, response, true)
 });
 //设备事件确认消息 okokok
 app.post('/events_dispose', function(req, response){
     sendPostAjax('/'+ req.body.category +'.events.dispose', req.headers, {
         events: req.body.events,
         disposed: req.body.disposed
-    }).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data);
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    }, response, true)
 });
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    sendPostAjax('/configurations.versions.create', req.headers, req.body)
-        .then(res=>{
-			response.setHeader('set-cookie', res.headers['set-cookie'])
-            response.send(res.data)
-        })
-        .catch(err=>{
-            response.send(errMessage)
-        })
+    sendPostAjax('/configurations.versions.create', req.headers, req.body, response, true)
 });
 
 //创建应用配置     ok
@@ -183,52 +166,27 @@ app.post('/configurations_versions_create', function (req, response) {
 //     "owner_id": "string"
 // }
 app.post('/configurations_create', function(req, response){
-    sendPostAjax('/configurations.create', req.headers, req.body).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/configurations.create', req.headers, req.body, response, true)
 });
 
 //删除模板   okokok
 app.post('/configurations_remove', function(req, response){
-    sendPostAjax('/configurations.remove', req.headers, req.body).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/configurations.remove', req.headers, req.body, response, true)
 });
 
 //读取模板信息
 app.get('/configurations_read', function (req, response) {
-    sendGetAjax('/configurations.read', req.headers, req.query).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send('err')
-    })
+    sendGetAjax('/configurations.read', req.headers, req.query, response, true)
 });
 
 //更新模板信息
 app.post('/configurations_update', function (req, response) {
-    sendPostAjax('/configurations.update', req.headers, req.body).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send(errMessage)
-    })
+    sendPostAjax('/configurations.update', req.headers, req.body, response, true)
 });
 
 //查询是否是开发者
 app.get('/developers_read', function (req, response) {
-    sendGetAjax('/developers.read', req.headers, req.query).then(res=>{
-		response.setHeader('set-cookie', res.headers['set-cookie'])
-        response.send(res.data)
-    }).catch(err=>{
-        response.send('err')
-    })
+    sendGetAjax('/developers.read', req.headers, req.query, response, true)
 });
 
 module.exports = app;
