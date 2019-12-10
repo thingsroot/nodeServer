@@ -33,9 +33,9 @@ axios.interceptors.response.use(config => {
     // config.headers.common['user_image'] = _getCookie('user_image');
     return config;
   });
-http.get = async (url, option)=>{
+http.get = (url, option)=>{
     return new Promise((resolve, reject)=>{
-         axios(url, {
+        axios(url, {
             method: 'GET',
             data: option.data || '',
             headers: option.headers || {
@@ -50,7 +50,7 @@ http.get = async (url, option)=>{
         })
     })
 }
-http.post = async (url, option)=>{
+http.post = (url, option)=>{
     return new Promise((resolve, reject) => {
         axios(url, {
             method: 'POST',

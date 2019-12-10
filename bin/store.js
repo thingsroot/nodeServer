@@ -60,7 +60,7 @@ app.get('/store_configurations_list',function (req, response) {
                     list && list.length > 0 && list.map((v)=>{
                         if (v.name === item[index]) {
                             v['latest_version'] = res.data.data;
-                        }
+                        } 
                     });
                     getLatestVersion(index + 1, item, req.headers)
                 })
