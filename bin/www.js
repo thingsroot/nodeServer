@@ -8,6 +8,7 @@ const companies = require('./companies');
 const gateways = require('./gateway');
 const applications = require('./applications');
 const user = require('./user')
+const developer = require('./developer')
 const port = 8881;
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -31,6 +32,7 @@ app.use(companies)
 app.use(gateways)
 app.use(applications)
 app.use(user)
+app.use(developer)
 
 app.listen(port, '127.0.0.1', function(){
     console.log('this port is ' + port + '....')
