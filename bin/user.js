@@ -10,12 +10,27 @@ app.post('/user_login', function(req, response){
 app.post('/user_logout', function(req, response){
     sendPostAjax('/user.logout', req.headers, req.body, response, true)
 })
-
-// 注册账户 未作处理
+// 获取公司邀请
+app.get('/user_company_invitations_list', function(req, response){
+    sendGetAjax('/user.company_invitations.list', req.headers, req.query, response, true)
+ })
+// 退出公司
+app.post('/user_companies_quit', function(req, response){
+    sendPostAjax('/user.companies.quit', req.headers, req.body, response, true)
+ })
+ // 接受公司邀请
+app.post('/user_company_invitations_accept', function(req, response){
+    sendPostAjax('/user.company_invitations.accept', req.headers, req.body, response, true)
+ })
+ // 拒绝公司邀请
+app.post('/user_company_invitations_reject', function(req, response){
+    sendPostAjax('/user.company_invitations.reject', req.headers, req.body, response, true)
+ })
+// 注册账户
 app.post('/user_create', function(req, response){
    sendPostAjax('/user.create', req.headers, req.body, response, true)
 })
-// 忘记密码 未做处理
+// 忘记密码
 app.post('/user_reset_password', function(req, response){
    sendPostAjax('/user.reset_password', req.headers, req.body, response, true)
 })

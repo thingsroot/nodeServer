@@ -82,6 +82,10 @@ app.post('/applications_create', function(req, response){
 app.post('/applications_update', function(req, response){
     sendPostAjax('/applications.update', req.headers, req.body, response, true)
 });
+//修改应用
+app.post('/applications_tags_update', function(req, response){
+    sendPostAjax('/applications.tags.update', req.headers, req.body, response, true)
+});
 
 //获取模板版本列表    okokok   conf:  模板id
 app.get('/configurations_versions_list', function (req, response) {

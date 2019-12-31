@@ -1,6 +1,17 @@
 const express = require('express');
 const app = express.Router();
 const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
+const option = {
+    target: 'http://ioe.thingsroot.com/api/v1/companies.requisition.create', // target host
+    changeOrigin: true,               // needed for virtual hosted sites
+};
+const exampleProxy = proxy_middle('/companies_requisition_create', option);
+app.use(exampleProxy)
+// 创建公司注册申请
+// app.post('/companies_requisition_create', function(req, response){
+//     sendPostAjax('/companies.requisition.create', req.headers, req.body, response, true)
+// })
 // 获取公司组列表
 app.get('/companies_groups_list', function(req, response){
     req.query.company = encodeURI(req.query.company)
@@ -42,6 +53,11 @@ app.post('/companies_create', function(req, response){
 app.post('/companies_update', function(req, response){
     sendPostAjax('/companies.update', req.headers, req.body, response, true)
 });
+// 邀请已存在用户加入公司
+app.post('/companies_employees_invite', function(req, response){
+    sendPostAjax('/companies.employees.invite', req.headers, req.body, response, true)
+});
+
 // 查询公司信息
 app.get('/companies_read', function(req, response){
     req.query.name = encodeURI(req.query.name)
@@ -154,10 +170,7 @@ app.post('/companies_sharedgroups_remove_device', function(req, response){
 app.get('/companies_requisition_list', function(req, response){
     sendGetAjax('/companies.requisition.list', req.headers, req.query, response, true)
 })
-// 创建公司注册申请
-app.post('/companies_requisition_create', function(req, response){
-    sendPostAjax('/companies.requisition.create', req.headers, req.body, response, true)
-})
+
 // 更新公司注册申请
 app.post('/companies_requisition_update', function(req, response){
     sendPostAjax('/companies.requisition.update', req.headers, req.body, response, true)
