@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express.Router();
-const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax, errMessage, path} = require('../common/sendAjax');
+const axios  = require('axios');
 app.get('/store_read', function(req, response){
     sendGetAjax('/store.read', req.headers, req.query, response, true)
 })
@@ -45,7 +46,38 @@ app.post('/store_favorites_remove', function(req, response){
 })
 //获取APP列表 未作处理 未测试
 app.get('/store_list', function(req, response){
-    sendGetAjax('/store.list', req.headers, req.query, response, true)
+    const user_list = [];
+    function MapGetUserInfo (arr, index, data) {
+        if (index >= arr.length) {
+            data.map(item=>{
+                item.user_info = user_list.filter(val=> val.name === item.developer)[0]
+            })
+            response.send({ok: true, data: data})
+            return false;
+        }
+        const url = path + '/developers.read?user=' + arr[index];
+        axios.get(url, {
+            headers: req.headers
+        }).then(res=>{
+            if (res.data.ok) {
+                user_list.push(res.data.data)
+                MapGetUserInfo(arr, index + 1, data)
+            } else {
+                MapGetUserInfo(arr, index, data)
+            }
+        })
+    }
+    sendGetAjax('/store.list', req.headers, req.query, response).then(res=>{
+        if (res.data.ok && res.data.data.length > 0) {
+            const arr = [];
+            res.data.data.map(item=>{
+                if (arr.indexOf(item.developer) === -1) {
+                    arr.push(item.developer)
+                }
+            })
+            MapGetUserInfo(arr, 0, res.data.data)
+        }
+    })
 })
 
 app.get('/store_configurations_list',function (req, response) {

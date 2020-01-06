@@ -38,9 +38,10 @@ app.get('/applications_read', function(req, response){
 			axios.all(
 				[
 					http.get(path + '/applications.versions.list?app=' + req.query.app, {headers: req.headers}),
-					http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers})
+					http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers}),
+					http.get(path + '/developers.read?user=' + res.data.data.developer, {headers: req.headers})
 				]
-			).then(axios.spread(function (versionList, versionLatest) {
+			).then(axios.spread(function (versionList, versionLatest, user_info) {
 				if (versionList.data.ok) {
 					obj['versionList'] = versionList.data.data;
 				} else {
@@ -50,6 +51,11 @@ app.get('/applications_read', function(req, response){
 					obj['versionLatest'] = versionLatest.data.data;
 				} else {
 					obj['versionLatest'] = 0;
+				}
+				if (user_info.data.ok) {
+					obj.data['user_info'] = user_info.data.data;
+				} else {
+					obj.data['user_info'] = null;
 				}
 				response.send({data: obj, ok: true});
 			}));
@@ -90,5 +96,9 @@ app.post('/applications_tags_update', function(req, response){
 //获取模板版本列表    okokok   conf:  模板id
 app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query, response, true)
+});
+//获取模板版本列表    okokok   conf:  模板id
+app.get('/applications_categories_list', function (req, response) {
+    sendGetAjax('/applications.categories.list', req.headers, req.query, response, true)
 });
 module.exports = app;
