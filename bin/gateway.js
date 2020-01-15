@@ -99,7 +99,6 @@ app.get('/gateways_historical_data', function(req, response){
 		} else {
 			set['end'] = '-0m' /* In case there is any timestamp bigger than real time */
 		}
-
 		InfluxClient.query(index, obj.tag, func, field, conditions, group_time, set, function(result){
 			const arr = result.results[0].series ? result.results[0].series[0].values : [];
 			const data = [];
@@ -116,8 +115,6 @@ app.get('/gateways_historical_data', function(req, response){
 		})
     })
 })
-
-
 // 刷新网关应用列表
 app.post('/gateways_applications_refresh', function(req, response){
     sendPostAjax('/gateways.applications.refresh', req.headers, req.body, response, true)
@@ -179,7 +176,6 @@ app.post('/gateways_data_flush', function(req, response){
 	sendPostAjax('/gateways.data_flush', req.headers, req.body, response, true)
 
 })
-
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, response){
     sendPostAjax('/gateways.beta.enable', req.headers, req.body, response, true)
@@ -200,11 +196,9 @@ app.post('/gateways_remove', function(req, response){
 app.post('/gateways_create', function(req, response){
     sendPostAjax('/gateways.create', req.headers, req.body, response, true)
 })
-
 app.get('/gateways_applications_list', function (req, response) {
     sendGetAjax('/gateways.applications.list', req.headers, req.query, response, true)
 })
-
 // 获取网关信息
 app.get('/gateways_read', function(req, response){
     sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
@@ -215,14 +209,7 @@ app.get('/gateways_read', function(req, response){
 		}
 
 		let result_data = res.data.data;
-		result_data.use_beta = result_data.use_beta ? Boolean(result_data.use_beta) : false
-
-		/*
-		result_data['cpu'] = "imx6ull 528MHz"
-		result_data['ram'] = "256 MB"
-		result_data['rom'] = "4 GB"
-		result_data['os'] = "openwrt"
-		*/
+		result_data.use_beta = result_data.use_beta ? Boolean(result_data.use_beta) : false;
 		result_data.ioe_network = false;
 		result_data.ioe_frpc = false;
 
@@ -248,6 +235,22 @@ app.get('/gateways_read', function(req, response){
 // 获取应用最新版本号
 app.get('/gateways_app_version_latest', function(req, response){
     sendGetAjax('/applications.versions.latest', req.headers, req.query, response, true)
+})
+// 获取网关临时共享列表
+app.get('/gateways_shares_list', function(req, response){
+    sendGetAjax('/gateways.shares.list', req.headers, req.query, response, true)
+})
+// 新建网关临时共享
+app.post('/gateways_shares_create', function(req, response){
+    sendPostAjax('/gateways.shares.create', req.headers, req.body, response, true)
+})
+// 新建网关临时共享
+app.post('/gateways_shares_update', function(req, response){
+    sendPostAjax('/gateways.shares.update', req.headers, req.body, response, true)
+})
+// 删除网关临时共享
+app.post('/gateways_shares_remove', function(req, response){
+    sendPostAjax('/gateways.shares.remove', req.headers, req.body, response, true)
 })
 // 获取App列表
 app.get('/gateways_app_list', function(req, response){
@@ -387,19 +390,13 @@ app.get('/gateway_online_record', function(req, response){
         .where('iot', req.query.sn)
         .addFunction('ipaddr')
         .then(res=>{
-        // var sql = client.query(req.query.type).where('time > now() - 7d ').where('iot', req.query.sn).addFunction('ipaddr').toString();
-        // console.info('##   sql:' + sql)
         if (res.results[0].series) {
-
             response.send({data: res.results[0].series[0].values, ok: true})
         } else {
-
             response.send({data: [], ok: false})
         }
     })
 })
-
-
 // redis获取网关列表
 app.get('/gateways_list', function(req, response){
     const arr = [];
@@ -426,7 +423,6 @@ app.get('/gateways_list', function(req, response){
 						})
 					})
 				} else {
-					// console.log("Read gateway failed", item[index])
 					queryGateway(index + 1, item, shared)
 				}
             })
@@ -435,7 +431,7 @@ app.get('/gateways_list', function(req, response){
     sendGetAjax('/gateways.list', req.headers).then(res=>{
         cookie = res.headers['set-cookie']
         let data = [];
-        const company_devices = res.data.data.company_devices;
+        const company_devices = res.data.data.company_devices ? res.data.data.company_devices : null;
         const shared_devices = res.data.data.shared_devices;
         const private_devices = res.data.data.private_devices;
 		data = private_devices ? private_devices : [];

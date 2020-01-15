@@ -178,7 +178,16 @@ app.post('/configurations_remove', function(req, response){
 app.get('/configurations_read', function (req, response) {
     sendGetAjax('/configurations.read', req.headers, req.query, response, true)
 });
-
+//读取模板信息
+app.get('/get_wps_url', function (req, response) {
+    axios.get('http://ioe.thingsroot.com/api/method/ioe_api.wps.wps_url?conf=' + req.query.conf + '&version=' + req.query.version + '&version_new=' + req.query.version_new, {
+        headers: req.headers
+    }).then(res=>{
+        if (res.data.ok) {
+            response.send(res.data)
+        }
+    })
+});
 //更新模板信息
 app.post('/configurations_update', function (req, response) {
     sendPostAjax('/configurations.update', req.headers, req.body, response, true)

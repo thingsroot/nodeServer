@@ -27,7 +27,6 @@ app.post('/applications_remove', function(req, response){
 app.get('/applications_versions_list', function(req, response){
     sendGetAjax('/applications.versions.list', req.headers, req.query, response, true)
 })
-
 // 应用详情  okokok     app: 应用id  user:  用户id
 app.get('/applications_read', function(req, response){
     sendGetAjax('/applications.read?name=' + req.query.app, req.headers).then(res=>{
@@ -66,7 +65,6 @@ app.get('/applications_read', function(req, response){
         response.send(errMessage)
     })
 });
-
 //应用列表   ok
 app.get('/applications_list', function(req, response){
     sendGetAjax('/applications.list', req.headers, req.query, response, true)
@@ -74,7 +72,6 @@ app.get('/applications_list', function(req, response){
 app.get('/applications_versions_latest', function (req, response) {
     sendGetAjax('/applications.versions.latest', req.headers, req.query, response, true)
 });
-
 //单个APP详情
 app.get('/applications_details', function (req, response) {
     sendGetAjax('/applications.read', req.headers, req.query, response, true)
@@ -83,7 +80,6 @@ app.get('/applications_details', function (req, response) {
 app.post('/applications_create', function(req, response){
     sendPostAjax('/applications.create', req.headers, req.body, response, true)
 });
-
 //修改应用
 app.post('/applications_update', function(req, response){
     sendPostAjax('/applications.update', req.headers, req.body, response, true)
@@ -92,7 +88,6 @@ app.post('/applications_update', function(req, response){
 app.post('/applications_tags_update', function(req, response){
     sendPostAjax('/applications.tags.update', req.headers, req.body, response, true)
 });
-
 //获取模板版本列表    okokok   conf:  模板id
 app.get('/configurations_versions_list', function (req, response) {
     sendGetAjax('/configurations.versions.list', req.headers, req.query, response, true)

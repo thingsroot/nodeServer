@@ -11,28 +11,23 @@ const config = {
 }
 */
 console.log('influxdb conf:', conf);
-
 InfluxClient = function() {};
-
 InfluxClient.getClient = function(database) {
     var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
 	return client;
 }
-
 InfluxClient.query = function(database, measurement, func, field, conditions, group_time, set, callback) {
     var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
     client.setMaxListeners(10)
 	console.log(func, field, conditions, group_time, set)
 	const reader = client.query(measurement)
-
 	if (func !== undefined) {
 		reader.addFunction(func, field)
 	} else {
 		reader.addField(field)
 	}
-
 	if (conditions !== undefined) {
 		reader.where(conditions)
 	}
@@ -42,13 +37,10 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
 	if (group_time !== undefined) {
 		reader.addGroup(group_time)
 	}
-	console.log(reader.toString())
-
     reader.then((data) => {
 		callback(data);
 	}).catch(console.error);
 };
-
 InfluxClient.queryCount = function(database, table, condition, count, callback, time) {
     var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
@@ -64,5 +56,4 @@ InfluxClient.queryCount = function(database, table, condition, count, callback, 
         callback(data);
     }).catch(console.error);
 };
-
 module.exports = InfluxClient;

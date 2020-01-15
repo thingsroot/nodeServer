@@ -5,7 +5,6 @@ const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 app.post('/user_login', function(req, response){
     sendPostAjax('/user.login', req.headers, req.body, response, true)
 })
-
 // 转接logout 未作处理
 app.post('/user_logout', function(req, response){
     sendPostAjax('/user.logout', req.headers, req.body, response, true)
@@ -34,7 +33,6 @@ app.post('/user_create', function(req, response){
 app.post('/user_reset_password', function(req, response){
    sendPostAjax('/user.reset_password', req.headers, req.body, response, true)
 })
-
 // 重新获取csrftoken
 app.get('/user_csrf_token', function(req, response){
    sendGetAjax('/user.csrf_token', req.headers, req.query, response, true)
@@ -99,7 +97,6 @@ app.get('/user_groups_list', function (req, response) {
 app.get('/user_configurations_list', function(req, response){
     sendGetAjax('/configurations.list?conf_type=Template', req.headers).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
-        let obj = [];
         let list = [];
         let app = req.query.app;
         function getLatestVersion(index, item) {
