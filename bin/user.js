@@ -3,7 +3,10 @@ const app = express.Router();
 const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 // 转接login 未作处理
 app.post('/user_login', function(req, response){
-    sendPostAjax('/user.login', req.headers, req.body, response, true)
+    sendPostAjax('/user.login', req.headers, req.body, response).then(res=>{
+        console.log(res.data)
+        response.send(res.data)
+    })
 })
 // 转接logout 未作处理
 app.post('/user_logout', function(req, response){

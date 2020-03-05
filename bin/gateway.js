@@ -252,6 +252,10 @@ app.post('/gateways_shares_update', function(req, response){
 app.post('/gateways_shares_remove', function(req, response){
     sendPostAjax('/gateways.shares.remove', req.headers, req.body, response, true)
 })
+// 查询网关信息
+app.get('/gateways_info_read', function(req, response){
+    sendGetAjax('/gateways.read', req.headers, req.query, response, true)
+})
 // 获取App列表
 app.get('/gateways_app_list', function(req, response){
     client.getMeta(req.query.gateway)
@@ -349,6 +353,7 @@ app.get('/gateways_app_list', function(req, response){
 				})
 				getAppList(0, values)
 			} else {
+                console.log(res, 'gateway_list')
 				response.send(res.data)
 			}
         }).catch(err=>{
