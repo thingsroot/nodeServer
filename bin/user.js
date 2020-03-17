@@ -62,7 +62,9 @@ app.get('/user_virtual_gateways_list', function(req, response){
                response.setHeader('set-cookie', res.headers['set-cookie'])
                arr.push(res.data.data)
                queryVirtual(index+1, data)
-           })
+           }).catch(()=>{
+            response.send(errMessage)
+        })
    }
    sendGetAjax('/user.virtual_gateways.list', req.headers).then(res=>{
        response.setHeader('set-cookie', res.headers['set-cookie'])
@@ -112,6 +114,8 @@ app.get('/user_configurations_list', function(req, response){
 
                     });
                     getLatestVersion(index + 1, item, req.headers)
+                }).catch(()=>{
+                    response.send(errMessage)
                 })
             }
         }

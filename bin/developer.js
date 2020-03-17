@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express.Router();
-const {sendGetAjax, sendPostAjax, errMessage, path} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax} = require('../common/sendAjax');
+const { path } = require('../config/env');
 // 创建新的应用开发者申请单
 app.post('/developers_requisition_create', function(req, response){
     sendPostAjax('/developers.requisition.create', req.headers, req.body, response, true)

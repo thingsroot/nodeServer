@@ -2,12 +2,9 @@ const axios = require('axios');
 const http = {};
 axios.defaults.withCredentials=true;
 axios.interceptors.response.use(config => {
-    // console.log(config.config.headers.cookie)
     http.cookie  = config.headers['set-cookie'].join();
-    
     // const cookie  = config.config.headers.cookie;
     // const cookie = config.headers['set-cookie'];
-    // console.log(cookie)
     // const obj = {};
     // if (cookie && cookie.length > 0){
     //     cookie.map((item)=>{
@@ -17,14 +14,12 @@ axios.interceptors.response.use(config => {
     //         }
     //     })
     // }
-    // console.log(obj)
     // // const arr = cookie.split(';');
     // // let obj = {};
+    // console.log(config, 'config')
     // // arr.map(item=>{
     // //   obj[item.split('=')[0].trim()] = item.split('=')[1];
     // // })
-    // // console.log(obj)
-    // console.log(config)
     // config.headers.common['auto_token'] = _getCookie('auto_token');
     // config.headers.common['full_name'] = _getCookie('full_name');
     // config.headers.common['sid'] = _getCookie('sid');

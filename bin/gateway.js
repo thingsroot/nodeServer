@@ -4,7 +4,8 @@ const InfluxClient = require('./influx');
 const client = require('./redis');
 const axios = require('axios');
 const http = require('../common/http');
-const {sendGetAjax, sendPostAjax, errMessage, path} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const {path} = require('../config/env');
 // 修改最小上传等级
 app.post('/gateways_enable_event', function(req, response){
     sendPostAjax('/gateways.enable_event', req.headers, req.body, response, true)
@@ -63,6 +64,8 @@ app.get('/gateway_devf_data', function(req, response){
                     }
                 })
         response.send(res.data);
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 // 获取网关设备SN
@@ -113,6 +116,8 @@ app.get('/gateways_historical_data', function(req, response){
 			})
 			response.send({data: data, ok: true})
 		})
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 // 刷新网关应用列表
@@ -141,6 +146,8 @@ app.get('/gateways_dev_list', function(req, response){
                 data.meta.sn = item[index];
                 arr.push(data);
                 getDevicesList(index + 1, item, req.headers)
+            }).catch(()=>{
+                response.send(errMessage)
             })
         }
     }
@@ -151,6 +158,8 @@ app.get('/gateways_dev_list', function(req, response){
             } else {
                 response.send({data: [], ok: true})
             }
+        }).catch(()=>{
+            response.send(errMessage)
         })
 })
 
@@ -228,8 +237,14 @@ app.get('/gateways_read', function(req, response){
 
 				}
                 response.send({ok: true, data: Object.assign(result_data, {data: result})})
+            }).catch(()=>{
+                response.send(errMessage)
             })
+        }).catch(()=>{
+            response.send(errMessage)
         })
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 // 获取应用最新版本号
@@ -289,6 +304,8 @@ app.get('/gateways_app_list', function(req, response){
                     } else {
                         response.send(errMessage)
                     }
+                }).catch(()=>{
+                    response.send(errMessage)
                 })
         })
     }
@@ -334,7 +351,9 @@ app.get('/gateways_app_list', function(req, response){
 					}
                     arr.push(item[index]);
                     getAppList(index + 1, item);
-                }))
+                })).catch(()=>{
+                    response.send(errMessage)
+                })
             }
         }
         sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
@@ -353,12 +372,13 @@ app.get('/gateways_app_list', function(req, response){
 				})
 				getAppList(0, values)
 			} else {
-                console.log(res, 'gateway_list')
 				response.send(res.data)
 			}
         }).catch(err=>{
             response.send(errMessage)
         })
+    }).catch(()=>{
+        response.send(errMessage)
     })
     
 })
@@ -400,6 +420,8 @@ app.get('/gateway_online_record', function(req, response){
         } else {
             response.send({data: [], ok: false})
         }
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 // redis获取网关列表
@@ -425,15 +447,26 @@ app.get('/gateways_list', function(req, response){
 							data.last_updated = data.modified.slice(0, -7)
 							arr.push(data)
 							queryGateway(index + 1, item, shared)
-						})
-					})
+						}).catch(()=>{
+                            response.send(errMessage)
+                        })
+					}).catch(()=>{
+                        response.send(errMessage)
+                    })
 				} else {
 					queryGateway(index + 1, item, shared)
 				}
+            }).catch(()=>{
+                response.send(errMessage)
             })
         }
     }
     sendGetAjax('/gateways.list', req.headers).then(res=>{
+        if (!res.data.ok) {
+            response.setHeader('set-cookie', res.headers['set-cookie'])
+            response.send(errMessage)
+            return false;
+        }
         cookie = res.headers['set-cookie']
         let data = [];
         const company_devices = res.data.data.company_devices ? res.data.data.company_devices : null;
@@ -475,6 +508,8 @@ app.get('/gateways_list', function(req, response){
                                 NullData.push(item[index])
                             }
                             dataMap(index + 1, item)
+                        }).catch(()=>{
+                            response.send(errMessage)
                         })
                     }
                 }
@@ -491,7 +526,11 @@ app.get('/gateways_list', function(req, response){
             } else {
                 queryGateway(0, all, shared)
             }
+        }).catch(()=>{
+            response.send(errMessage)
         })
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 // 网关应用更新

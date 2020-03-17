@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express.Router();
-const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax } = require('../common/sendAjax');
+const {path} = require('../config/env');
 const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 const option = {
-    target: 'http://ioe.thingsroot.com/api/v1/companies.requisition.create', // target host
+    target: path + '/companies.requisition.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const exampleProxy = proxy_middle('/companies_requisition_create', option);

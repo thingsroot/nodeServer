@@ -1,14 +1,15 @@
 const express = require('express');
 const app = express.Router();
 const axios = require('axios');
-const {sendGetAjax, sendPostAjax, path, errMessage} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const {path} = require('../config/env');
 const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 const options = {
-    target: 'http://ioe.thingsroot.com/api/v1/applications.versions.create', // target host
+    target: path + '/applications.versions.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const option = {
-    target: 'http://ioe.thingsroot.com/api/v1/applications.icon', // target host
+    target: path + '/applications.icon', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const exampleProxy = proxy_middle('/applications_versions_create', options);
@@ -111,6 +112,8 @@ app.get('/device_events_list', function (req, response) {
 		}).catch( (err) => {
             response.send(errMessage)
 		})
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 
@@ -186,6 +189,8 @@ app.get('/get_wps_url', function (req, response) {
         if (res.data.ok) {
             response.send(res.data)
         }
+    }).catch(()=>{
+        response.send(errMessage)
     })
 });
 //更新模板信息

@@ -21,7 +21,7 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
     var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
     client.setMaxListeners(10)
-	console.log(func, field, conditions, group_time, set)
+	// console.log(func, field, conditions, group_time, set)
 	const reader = client.query(measurement)
 	if (func !== undefined) {
 		reader.addFunction(func, field)

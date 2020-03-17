@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express.Router();
-const {sendGetAjax, sendPostAjax, errMessage, path} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const {path} = require('../config/env');
 const axios  = require('axios');
 app.get('/store_read', function(req, response){
     sendGetAjax('/store.read', req.headers, req.query, response, true)
@@ -65,6 +66,8 @@ app.get('/store_list', function(req, response){
             } else {
                 MapGetUserInfo(arr, index, data)
             }
+        }).catch(()=>{
+            response.send(errMessage)
         })
     }
     sendGetAjax('/store.list', req.headers, req.query, response).then(res=>{
@@ -77,6 +80,8 @@ app.get('/store_list', function(req, response){
             })
             MapGetUserInfo(arr, 0, res.data.data)
         }
+    }).catch(()=>{
+        response.send(errMessage)
     })
 })
 
@@ -95,6 +100,8 @@ app.get('/store_configurations_list',function (req, response) {
                         } 
                     });
                     getLatestVersion(index + 1, item, req.headers)
+                }).catch(()=>{
+                    response.send(errMessage)
                 })
             }
         }

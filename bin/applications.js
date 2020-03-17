@@ -2,7 +2,8 @@ const express = require('express');
 const app = express.Router();
 const axios = require('axios');
 const http = require('../common/http');
-const {sendGetAjax, sendPostAjax, errMessage, path} = require('../common/sendAjax');
+const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
+const { path } = require('../config/env');
 // 查询应用详细信息
 app.get('/applications_info', function(req, response){
     sendGetAjax('/applications.read', req.headers, req.query, response, true)
@@ -57,7 +58,10 @@ app.get('/applications_read', function(req, response){
 					obj.data['user_info'] = null;
 				}
 				response.send({data: obj, ok: true});
-			}));
+			})).catch((err)=>{
+				console.log(err, 'err')
+				response.send(errMessage)
+			});
 		} else {
 			response.send(res.data)
 		}
