@@ -101,16 +101,19 @@ app.get('/gateways_historical_data', function(req, response){
 			set['end'] = obj.end
 		} else {
 			set['end'] = '-0m' /* In case there is any timestamp bigger than real time */
-		}
+        }
 		InfluxClient.query(index, obj.tag, func, field, conditions, group_time, set, function(result){
-			const arr = result.results[0].series ? result.results[0].series[0].values : [];
-			const data = [];
+            const arr = result.results[0].series ? result.results[0].series[0].values : [];
+            const columns = result.results[0].series ? result.results[0].series[0].columns : [];
+            const ind = columns[1] === 'quality' ? 1 : 2;
+            const valueInd = columns[1] !== 'quality' ? 1 : 2;
+            const data = [];
 			arr.map(item=>{
 				data.push({
 					name: obj.tag,
-					quality: 0,
+					quality: item[ind],
 					time: item[0],
-					value: typeof item[1] === 'number' ? item[1] !== null ? item[1].toFixed(2) : 0 : item[1],
+					value: typeof item[valueInd] === 'number' ? item[valueInd] !== null ? item[valueInd].toFixed(2) : 0 : item[valueInd],
 					vsn: obj.sn
 				})
 			})
@@ -298,13 +301,13 @@ app.get('/gateways_app_list', function(req, response){
                 }
             }
                 sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
-					response.setHeader('set-cookie', res.headers['set-cookie'])
+                    response.setHeader('set-cookie', res.headers['set-cookie'])
                     if (res.data.data){
                         getDevicesList(0, res.data.data)
                     } else {
                         response.send(errMessage)
                     }
-                }).catch(()=>{
+                }).catch((err)=>{
                     response.send(errMessage)
                 })
         })

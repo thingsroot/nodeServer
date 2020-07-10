@@ -59,7 +59,6 @@ app.get('/applications_read', function(req, response){
 				}
 				response.send({data: obj, ok: true});
 			})).catch((err)=>{
-				console.log(err, 'err')
 				response.send(errMessage)
 			});
 		} else {

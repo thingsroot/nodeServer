@@ -44,6 +44,7 @@ function sendPostAjax (url, headers, body, response, WhetherToSend){
             WhetherToSend && response.send(res.data)
             resolve(res)
         }).catch(err=>{
+            console.log(err, 'err')
             WhetherToSend && response.send(errMessage)
             reject(err)
         })

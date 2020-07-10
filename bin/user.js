@@ -71,7 +71,6 @@ app.get('/user_virtual_gateways_list', function(req, response){
        if (res.data.data && res.data.data.length > 0){
            queryVirtual(0, res.data.data)
        } else {
-
            response.send({data: [], ok: true})
        }
    }).catch((err)=>{

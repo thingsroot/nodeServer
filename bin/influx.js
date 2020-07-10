@@ -21,15 +21,16 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
     var dblink = 'http://' + conf.user + ':' + conf.password + '@' + conf.host + ':' + conf.port + '/' + database;
     var client = new Influx(dblink);
     client.setMaxListeners(10)
-	// console.log(func, field, conditions, group_time, set)
-	const reader = client.query(measurement)
+    const reader = client.query(measurement)
 	if (func !== undefined) {
-		reader.addFunction(func, field)
+		reader.addFunction(func, field, 'quality')
+		// reader.addFunction(func, 'quality')
 	} else {
-		reader.addField(field)
+		reader.addField(field, 'quality')
+		// reader.addField('quality')
 	}
 	if (conditions !== undefined) {
-		reader.where(conditions)
+        reader.where(conditions)
 	}
 	if (set !== undefined) {
 		reader.set(set)
@@ -38,7 +39,7 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
 		reader.addGroup(group_time)
 	}
     reader.then((data) => {
-		callback(data);
+        callback(data);
 	}).catch(console.error);
 };
 InfluxClient.queryCount = function(database, table, condition, count, callback, time) {
