@@ -143,7 +143,7 @@ app.get('/gateways_dev_list', function(req, response){
             response.send({data: arr, ok: true})
             return false;
         } else {
-            http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
+            http.get(path + 'gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
                 const data = res.data.data;
                 data.meta.sn = item[index];
@@ -287,7 +287,7 @@ app.get('/gateways_app_list', function(req, response){
                     resolve(arr)
                     return false;
                 } else {
-                    http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
+                    http.get(path + 'gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
 						response.setHeader('set-cookie', res.headers['set-cookie'])
 						if (res.data.ok) {
 							const data = res.data.data;
@@ -334,9 +334,9 @@ app.get('/gateways_app_list', function(req, response){
             } else {
                 name.push(item[index].name)
                 axios.all([
-                    http.get(path + '/store.read?name=' + item[index].name, req.headers),
-                    http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers}),
-                    http.get(path + '/applications.versions.beta?app=' + item[index].name + '&version=' + item[index].version, {headers: req.headers})
+                    http.get(path + 'store.read?name=' + item[index].name, req.headers),
+                    http.get(path + 'applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers}),
+                    http.get(path + 'applications.versions.beta?app=' + item[index].name + '&version=' + item[index].version, {headers: req.headers})
                 ]).then(axios.spread((res, version, beta)=>{
                     if(res.data.ok){
                         item[index].data = res.data.data;
@@ -436,7 +436,7 @@ app.get('/gateways_list', function(req, response){
             response.setHeader('set-cookie', cookie)
             response.send({data: arr, ok: true})
         } else {
-            http.get(path + '/gateways.read?name=' + escape(item[index]), {headers: req.headers}).then(res=>{
+            http.get(path + 'gateways.read?name=' + escape(item[index]), {headers: req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
 				if (res.data.ok) {
 					let data = res.data.data;

@@ -56,7 +56,7 @@ app.get('/store_list', function(req, response){
             response.send({ok: true, data: data})
             return false;
         }
-        const url = path + '/developers.read?user=' + arr[index];
+        const url = path + 'developers.read?user=' + arr[index];
         axios.get(url, {
             headers: req.headers
         }).then(res=>{

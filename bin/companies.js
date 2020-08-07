@@ -4,7 +4,7 @@ const {sendGetAjax, sendPostAjax } = require('../common/sendAjax');
 const {path} = require('../config/env');
 const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 const option = {
-    target: path + '/companies.requisition.create', // target host
+    target: path + 'companies.requisition.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const exampleProxy = proxy_middle('/companies_requisition_create', option);

@@ -37,9 +37,9 @@ app.get('/applications_read', function(req, response){
 			obj['data'] = res.data.data;
 			axios.all(
 				[
-					http.get(path + '/applications.versions.list?app=' + req.query.app, {headers: req.headers}),
-					http.get(path + '/applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers}),
-					http.get(path + '/developers.read?user=' + res.data.data.developer, {headers: req.headers})
+					http.get(path + 'applications.versions.list?app=' + req.query.app, {headers: req.headers}),
+					http.get(path + 'applications.versions.latest?app=' + req.query.app + '&beta=1', {headers: req.headers}),
+					http.get(path + 'developers.read?user=' + res.data.data.developer, {headers: req.headers})
 				]
 			).then(axios.spread(function (versionList, versionLatest, user_info) {
 				if (versionList.data.ok) {

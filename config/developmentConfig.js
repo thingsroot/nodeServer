@@ -14,5 +14,5 @@ module.exports = {
 		// host: '127.0.0.1'
 	},
 	domain: domain,
-	path: domain + '/api/v1'
+	path: domain + '/api/v1/'
 }

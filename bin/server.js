@@ -5,11 +5,11 @@ const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 const {path} = require('../config/env');
 const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 const options = {
-    target: path + '/applications.versions.create', // target host
+    target: path + 'applications.versions.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const option = {
-    target: path + '/applications.icon', // target host
+    target: path + 'applications.icon', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const exampleProxy = proxy_middle('/applications_versions_create', options);
@@ -41,7 +41,7 @@ app.get('/versions_list', function (req, response) {
 app.get('/platform_activities_lists', function (req, response) {
     let data = {};
     axios({
-        url: path + '/'+ req.query.category +'.activities.list',
+        url: path + req.query.category +'.activities.list',
         method: 'GET',
         data: {
             name: req.query.name,
@@ -61,7 +61,7 @@ app.get('/platform_activities_lists', function (req, response) {
             filters: JSON.parse(req.query.filters)
 		}
 		axios({
-			url: path + '/'+ req.query.category +'.activities.count',
+			url: path + req.query.category +'.activities.count',
 			method: 'GET',
 			data: query, 
 			headers: req.headers
@@ -81,7 +81,7 @@ app.get('/platform_activities_lists', function (req, response) {
 app.get('/device_events_list', function (req, response) {
     let data = {};
     axios({
-        url: path + '/'+ req.query.category +'.events.list',
+        url: path + req.query.category +'.events.list',
         method: 'GET',
         data: {
             name: req.query.name,
@@ -101,7 +101,7 @@ app.get('/device_events_list', function (req, response) {
             filters: JSON.parse(req.query.filters)
 		}
 		axios({
-			url: path + '/'+ req.query.category +'.events.count',
+			url: path + req.query.category +'.events.count',
 			method: 'GET',
 			data: query, 
 			headers: req.headers
