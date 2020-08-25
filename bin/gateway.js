@@ -8,56 +8,56 @@ const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 const {path} = require('../config/env');
 // 修改最小上传等级
 app.post('/gateways_enable_event', function(req, response){
-    sendPostAjax('/gateways.enable_event', req.headers, req.body, response, true)
+    sendPostAjax('gateways.enable_event', req.headers, req.body, response, true)
 })
 // 修改云配置项
 app.post('/gateways_cloud_conf', function(req, response){
-    sendPostAjax('/gateways.cloud_conf', req.headers, req.body, response, true)
+    sendPostAjax('gateways.cloud_conf', req.headers, req.body, response, true)
 })
 // 开启网关设备上送分析数据
 app.post('/gateways_stat_enable', function(req, response){
-    sendPostAjax('/gateways.enable_stat', req.headers, req.body, response, true)
+    sendPostAjax('gateways.enable_stat', req.headers, req.body, response, true)
 })
 // 重启设备
 app.post('/gateways_reboot', function(req, response){
-    sendPostAjax('/gateways.reboot', req.headers, req.body, response, true)
+    sendPostAjax('gateways.reboot', req.headers, req.body, response, true)
 })
 // 重启FreeIOE(只重启软件)
 app.post('/gateways_restart', function(req, response){
-    sendPostAjax('/gateways.restart', req.headers, req.body, response, true)
+    sendPostAjax('gateways.restart', req.headers, req.body, response, true)
 })
 
 // 设定设备输出项数据
 app.post('/gateways_dev_outputs', function(req, response){
-    sendPostAjax('/gateways.devices.output', req.headers, req.body, response, true)
+    sendPostAjax('gateways.devices.output', req.headers, req.body, response, true)
 });
 
 // 发送设备控制指令
 app.post('/gateways_dev_commands', function(req, response){
-    sendPostAjax('/gateways.devices.command', req.headers, req.body, response, true)
+    sendPostAjax('gateways.devices.command', req.headers, req.body, response, true)
 });
 // 安装APP okokok
 app.post('/gateways_applications_install', function(req, response){
-    sendPostAjax('/gateways.applications.install', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.install', req.headers, req.body, response, true)
 })
 app.post('/gateways_applications_remove', function(req, response){
-    sendPostAjax('/gateways.applications.remove', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.remove', req.headers, req.body, response, true)
 })
 // 设置网关应用option
 app.post('/gateways_applications_option', function(req, response){
-    sendPostAjax('/gateways.applications.option', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.option', req.headers, req.body, response, true)
 })
 // 网关操作指令结果查询  接口API没写对 传递参数是id
 app.get('/gateways_exec_result', function(req, response){
-    sendGetAjax('/gateways.exec_result', req.headers, req.query, response, true)
+    sendGetAjax('gateways.exec_result', req.headers, req.query, response, true)
 })
 // 网关信息查询
 app.post('/gateways_info', function(req, response){
-    sendPostAjax('/gateways.info', req.headers, req.body, response, true)
+    sendPostAjax('gateways.info', req.headers, req.body, response, true)
 })
 // 获取
 app.get('/gateway_devf_data', function(req, response){
-    sendGetAjax('/gateways.devices.data', req.headers, req.query, response).then(res=>{
+    sendGetAjax('gateways.devices.data', req.headers, req.query, response).then(res=>{
         res.data && res.data.length > 0 && res.data.map((item)=>{
                     if (!item.vt){
                         item.vt = 'float'
@@ -70,11 +70,11 @@ app.get('/gateway_devf_data', function(req, response){
 })
 // 获取网关设备SN
 app.get('/gateways_devices_list', function(req, response){
-    sendGetAjax('/gateways.devices.list', req.headers, req.query, response, true)
+    sendGetAjax('gateways.devices.list', req.headers, req.query, response, true)
 })
 // 获取网关采集设备中的实时数据
 app.get('/gateways_dev_data', function(req, response){
-    sendGetAjax('/gateways.devices.data', req.headers, req.query, response, true)
+    sendGetAjax('gateways.devices.data', req.headers, req.query, response, true)
 })
 // 获取网关历史数据
 app.get('/gateways_historical_data', function(req, response){
@@ -125,15 +125,15 @@ app.get('/gateways_historical_data', function(req, response){
 })
 // 刷新网关应用列表
 app.post('/gateways_applications_refresh', function(req, response){
-    sendPostAjax('/gateways.applications.refresh', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.refresh', req.headers, req.body, response, true)
 })
 // 要求网关上传设备日志
 app.post('/gateways_enable_log', function(req, response){
-    sendPostAjax('/gateways.enable_log', req.headers, req.body, response, true)
+    sendPostAjax('gateways.enable_log', req.headers, req.body, response, true)
 })
 // 要求网关上传设备报文
 app.post('/gateways_enable_comm', function(req, response){
-    sendPostAjax('/gateways.enable_comm', req.headers, req.body, response, true)
+    sendPostAjax('gateways.enable_comm', req.headers, req.body, response, true)
 })
 // 获取网关设备列表
 app.get('/gateways_dev_list', function(req, response){
@@ -143,7 +143,7 @@ app.get('/gateways_dev_list', function(req, response){
             response.send({data: arr, ok: true})
             return false;
         } else {
-            http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
+            http.get(path + 'gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
                 const data = res.data.data;
                 data.meta.sn = item[index];
@@ -154,7 +154,7 @@ app.get('/gateways_dev_list', function(req, response){
             })
         }
     }
-        sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
+        sendGetAjax('gateways.devices.list', req.headers, req.query).then(res=>{
 			response.setHeader('set-cookie', res.headers['set-cookie'])
             if (res.data.data){
                 getDevicesList(0, res.data.data)
@@ -168,52 +168,52 @@ app.get('/gateways_dev_list', function(req, response){
 
 // 查询beta模式
 app.get('/gateways_beta_read', function(req, response){
-    sendGetAjax('/gateways.beta.read', req.headers, req.query, response, true)
+    sendGetAjax('gateways.beta.read', req.headers, req.query, response, true)
 })
 // 开启数据上送
 app.post('/gateways_data_enable', function(req, response){
-    sendPostAjax('/gateways.enable_data', req.headers, req.body, response, true)
+    sendPostAjax('gateways.enable_data', req.headers, req.body, response, true)
 })
 // 数据临时上送
 app.post('/gateways_enable_data_one_short', function(req, response){
-	sendPostAjax('/gateways.enable_data_one_short', req.headers, req.body, response, true)
+	sendPostAjax('gateways.enable_data_one_short', req.headers, req.body, response, true)
 
 })
 // 数据快照
 app.post('/gateways_data_snapshot', function(req, response){
-	sendPostAjax('/gateways.data_snapshot', req.headers, req.body, response, true)
+	sendPostAjax('gateways.data_snapshot', req.headers, req.body, response, true)
 })
 // 数据缓存刷新
 app.post('/gateways_data_flush', function(req, response){
-	sendPostAjax('/gateways.data_flush', req.headers, req.body, response, true)
+	sendPostAjax('gateways.data_flush', req.headers, req.body, response, true)
 
 })
 // 开启beta模式
 app.post('/gateways_beta_enable', function(req, response){
-    sendPostAjax('/gateways.beta.enable', req.headers, req.body, response, true)
+    sendPostAjax('gateways.beta.enable', req.headers, req.body, response, true)
 })
 // 網關應用升級
 app.post('/gateways_applications_upgrade', function(req, response){
-    sendPostAjax('/gateways.applications.upgrade', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.upgrade', req.headers, req.body, response, true)
 })
 // 关闭beta模式
 app.post('/gateways_beta_disable', function(req, response){
-    sendPostAjax('/gateways.beta.disable', req.headers, req.body, response, true)
+    sendPostAjax('gateways.beta.disable', req.headers, req.body, response, true)
 })
 // 删除网关  未作处理  未测试
 app.post('/gateways_remove', function(req, response){
-    sendPostAjax('/gateways.remove', req.headers, req.body, response, true)
+    sendPostAjax('gateways.remove', req.headers, req.body, response, true)
 })
 // 增加gateways网关
 app.post('/gateways_create', function(req, response){
-    sendPostAjax('/gateways.create', req.headers, req.body, response, true)
+    sendPostAjax('gateways.create', req.headers, req.body, response, true)
 })
 app.get('/gateways_applications_list', function (req, response) {
-    sendGetAjax('/gateways.applications.list', req.headers, req.query, response, true)
+    sendGetAjax('gateways.applications.list', req.headers, req.query, response, true)
 })
 // 获取网关信息
 app.get('/gateways_read', function(req, response){
-    sendGetAjax('/gateways.read', req.headers, req.query).then(res=>{
+    sendGetAjax('gateways.read', req.headers, req.query).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
 		if (!res.data.ok) {
 			response.send(res.data)
@@ -252,27 +252,27 @@ app.get('/gateways_read', function(req, response){
 })
 // 获取应用最新版本号
 app.get('/gateways_app_version_latest', function(req, response){
-    sendGetAjax('/applications.versions.latest', req.headers, req.query, response, true)
+    sendGetAjax('applications.versions.latest', req.headers, req.query, response, true)
 })
 // 获取网关临时共享列表
 app.get('/gateways_shares_list', function(req, response){
-    sendGetAjax('/gateways.shares.list', req.headers, req.query, response, true)
+    sendGetAjax('gateways.shares.list', req.headers, req.query, response, true)
 })
 // 新建网关临时共享
 app.post('/gateways_shares_create', function(req, response){
-    sendPostAjax('/gateways.shares.create', req.headers, req.body, response, true)
+    sendPostAjax('gateways.shares.create', req.headers, req.body, response, true)
 })
 // 新建网关临时共享
 app.post('/gateways_shares_update', function(req, response){
-    sendPostAjax('/gateways.shares.update', req.headers, req.body, response, true)
+    sendPostAjax('gateways.shares.update', req.headers, req.body, response, true)
 })
 // 删除网关临时共享
 app.post('/gateways_shares_remove', function(req, response){
-    sendPostAjax('/gateways.shares.remove', req.headers, req.body, response, true)
+    sendPostAjax('gateways.shares.remove', req.headers, req.body, response, true)
 })
 // 查询网关信息
 app.get('/gateways_info_read', function(req, response){
-    sendGetAjax('/gateways.read', req.headers, req.query, response, true)
+    sendGetAjax('gateways.read', req.headers, req.query, response, true)
 })
 // 获取App列表
 app.get('/gateways_app_list', function(req, response){
@@ -287,7 +287,7 @@ app.get('/gateways_app_list', function(req, response){
                     resolve(arr)
                     return false;
                 } else {
-                    http.get(path + '/gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
+                    http.get(path + 'gateways.devices.read?gateway=' + req.query.gateway + '&name=' + item[index], {headers:req.headers}).then(res=>{
 						response.setHeader('set-cookie', res.headers['set-cookie'])
 						if (res.data.ok) {
 							const data = res.data.data;
@@ -300,7 +300,7 @@ app.get('/gateways_app_list', function(req, response){
                     })
                 }
             }
-                sendGetAjax('/gateways.devices.list', req.headers, req.query).then(res=>{
+                sendGetAjax('gateways.devices.list', req.headers, req.query).then(res=>{
                     response.setHeader('set-cookie', res.headers['set-cookie'])
                     if (res.data.data){
                         getDevicesList(0, res.data.data)
@@ -334,9 +334,9 @@ app.get('/gateways_app_list', function(req, response){
             } else {
                 name.push(item[index].name)
                 axios.all([
-                    http.get(path + '/store.read?name=' + item[index].name, req.headers),
-                    http.get(path + '/applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers}),
-                    http.get(path + '/applications.versions.beta?app=' + item[index].name + '&version=' + item[index].version, {headers: req.headers})
+                    http.get(path + 'store.read?name=' + item[index].name, req.headers),
+                    http.get(path + 'applications.versions.latest?beta=' + req.query.beta + '&app=' + item[index].name, {headers: req.headers}),
+                    http.get(path + 'applications.versions.beta?app=' + item[index].name + '&version=' + item[index].version, {headers: req.headers})
                 ]).then(axios.spread((res, version, beta)=>{
                     if(res.data.ok){
                         item[index].data = res.data.data;
@@ -359,7 +359,7 @@ app.get('/gateways_app_list', function(req, response){
                 })
             }
         }
-        sendGetAjax('/gateways.applications.list', req.headers, req.query).then(res=>{
+        sendGetAjax('gateways.applications.list', req.headers, req.query).then(res=>{
             response.setHeader('set-cookie', res.headers['set-cookie'])
 			if (res.data.ok) {
 				const data = res.data.data;
@@ -387,27 +387,27 @@ app.get('/gateways_app_list', function(req, response){
 })
 // 网关应用更改名称
 app.post('/gateways_applications_rename', function(req, response){
-    sendPostAjax('/gateways.applications.rename', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.rename', req.headers, req.body, response, true)
 })
 // 网关应用开启
 app.post('/gateways_applications_start', function(req, response){
-    sendPostAjax('/gateways.applications.start', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.start', req.headers, req.body, response, true)
 })
 // 网关应用配置
 app.post('/gateways_applications_conf', function(req, response){
-    sendPostAjax('/gateways.applications.conf', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.conf', req.headers, req.body, response, true)
 })
 // 网关应用关闭
 app.post('/gateways_applications_stop', function(req, response){
-    sendPostAjax('/gateways.applications.stop', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.stop', req.headers, req.body, response, true)
 })
 // 网关应用重启
 app.post('/gateways_applications_restart', function(req, response){
-    sendPostAjax('/gateways.applications.restart', req.headers, req.body, response, true)
+    sendPostAjax('gateways.applications.restart', req.headers, req.body, response, true)
 })
 // 更新网关信息
 app.post('/gateways_update', function(req, response){
-    sendPostAjax('/gateways.update', req.headers, req.body, response, true)
+    sendPostAjax('gateways.update', req.headers, req.body, response, true)
 })
 // influxdb 获取在线Ip记录
 app.get('/gateway_online_record', function(req, response){
@@ -436,7 +436,7 @@ app.get('/gateways_list', function(req, response){
             response.setHeader('set-cookie', cookie)
             response.send({data: arr, ok: true})
         } else {
-            http.get(path + '/gateways.read?name=' + escape(item[index]), {headers: req.headers}).then(res=>{
+            http.get(path + 'gateways.read?name=' + escape(item[index]), {headers: req.headers}).then(res=>{
 				response.setHeader('set-cookie', res.headers['set-cookie'])
 				if (res.data.ok) {
 					let data = res.data.data;
@@ -464,7 +464,7 @@ app.get('/gateways_list', function(req, response){
             })
         }
     }
-    sendGetAjax('/gateways.list', req.headers).then(res=>{
+    sendGetAjax('gateways.list', req.headers).then(res=>{
         if (!res.data.ok) {
             response.setHeader('set-cookie', res.headers['set-cookie'])
             response.send(errMessage)
@@ -538,6 +538,6 @@ app.get('/gateways_list', function(req, response){
 })
 // 网关应用更新
 app.post('/gateways_upgrade', function(req, response){
-    sendPostAjax('/gateways.upgrade', req.headers, req.body, response, true)
+    sendPostAjax('gateways.upgrade', req.headers, req.body, response, true)
 })
 module.exports = app;

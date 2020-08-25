@@ -34,6 +34,6 @@ app.use(applications)
 app.use(user)
 app.use(developer)
 
-app.listen(port, '127.0.0.1', function(){
+app.listen(port, '0.0.0.0', function(){
     console.log('this port is ' + port + '....')
 })

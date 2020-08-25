@@ -5,11 +5,11 @@ const {sendGetAjax, sendPostAjax, errMessage} = require('../common/sendAjax');
 const {path} = require('../config/env');
 const proxy_middle = require('http-proxy-middleware');//引入nodejs的反向代理模块
 const options = {
-    target: path + '/applications.versions.create', // target host
+    target: path + 'applications.versions.create', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const option = {
-    target: path + '/applications.icon', // target host
+    target: path + 'applications.icon', // target host
     changeOrigin: true,               // needed for virtual hosted sites
 };
 const exampleProxy = proxy_middle('/applications_versions_create', options);
@@ -19,7 +19,7 @@ app.use(example);
 
 //刷新应用版本列表
 app.get('/versions_list', function (req, response) {
-    sendGetAjax('/applications.versions.list', req.headers, req.query).then(res=>{
+    sendGetAjax('applications.versions.list', req.headers, req.query).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         response.send(res.data);
     }).catch(()=>{
@@ -41,7 +41,7 @@ app.get('/versions_list', function (req, response) {
 app.get('/platform_activities_lists', function (req, response) {
     let data = {};
     axios({
-        url: path + '/'+ req.query.category +'.activities.list',
+        url: path + req.query.category +'.activities.list',
         method: 'GET',
         data: {
             name: req.query.name,
@@ -61,7 +61,7 @@ app.get('/platform_activities_lists', function (req, response) {
             filters: JSON.parse(req.query.filters)
 		}
 		axios({
-			url: path + '/'+ req.query.category +'.activities.count',
+			url: path + req.query.category +'.activities.count',
 			method: 'GET',
 			data: query, 
 			headers: req.headers
@@ -81,7 +81,7 @@ app.get('/platform_activities_lists', function (req, response) {
 app.get('/device_events_list', function (req, response) {
     let data = {};
     axios({
-        url: path + '/'+ req.query.category +'.events.list',
+        url: path + req.query.category +'.events.list',
         method: 'GET',
         data: {
             name: req.query.name,
@@ -101,7 +101,7 @@ app.get('/device_events_list', function (req, response) {
             filters: JSON.parse(req.query.filters)
 		}
 		axios({
-			url: path + '/'+ req.query.category +'.events.count',
+			url: path + req.query.category +'.events.count',
 			method: 'GET',
 			data: query, 
 			headers: req.headers
@@ -119,7 +119,7 @@ app.get('/device_events_list', function (req, response) {
 
 //获取某个模板指定版本下的数据    conf: 模板id   version： 指定版本号
 app.get('/configurations_version_read', function (req, response) {
-    sendGetAjax('/configurations.versions.list?conf=' + req.query.conf, req.headers).then(res=>{
+    sendGetAjax('configurations.versions.list?conf=' + req.query.conf, req.headers).then(res=>{
 		response.setHeader('set-cookie', res.headers['set-cookie'])
         let list = res.data.data;
         let data = undefined;
@@ -140,14 +140,14 @@ app.get('/configurations_version_read', function (req, response) {
 
 //平台事件确认消息   okokok
 app.post('/activities_dispose', function(req, response){
-    sendPostAjax('/'+ req.body.category +'.activities.dispose', req.headers, {
+    sendPostAjax(req.body.category +'.activities.dispose', req.headers, {
         activities: req.body.activities,
         disposed: req.body.disposed
     }, response, true)
 });
 //设备事件确认消息 okokok
 app.post('/events_dispose', function(req, response){
-    sendPostAjax('/'+ req.body.category +'.events.dispose', req.headers, {
+    sendPostAjax(req.body.category +'.events.dispose', req.headers, {
         events: req.body.events,
         disposed: req.body.disposed
     }, response, true)
@@ -155,7 +155,7 @@ app.post('/events_dispose', function(req, response){
 
 //创建模板新版本  okokok
 app.post('/configurations_versions_create', function (req, response) {
-    sendPostAjax('/configurations.versions.create', req.headers, req.body, response, true)
+    sendPostAjax('configurations.versions.create', req.headers, req.body, response, true)
 });
 
 //创建应用配置     ok
@@ -169,17 +169,17 @@ app.post('/configurations_versions_create', function (req, response) {
 //     "owner_id": "string"
 // }
 app.post('/configurations_create', function(req, response){
-    sendPostAjax('/configurations.create', req.headers, req.body, response, true)
+    sendPostAjax('configurations.create', req.headers, req.body, response, true)
 });
 
 //删除模板   okokok
 app.post('/configurations_remove', function(req, response){
-    sendPostAjax('/configurations.remove', req.headers, req.body, response, true)
+    sendPostAjax('configurations.remove', req.headers, req.body, response, true)
 });
 
 //读取模板信息
 app.get('/configurations_read', function (req, response) {
-    sendGetAjax('/configurations.read', req.headers, req.query, response, true)
+    sendGetAjax('configurations.read', req.headers, req.query, response, true)
 });
 //读取模板信息
 app.get('/get_wps_url', function (req, response) {
@@ -195,12 +195,12 @@ app.get('/get_wps_url', function (req, response) {
 });
 //更新模板信息
 app.post('/configurations_update', function (req, response) {
-    sendPostAjax('/configurations.update', req.headers, req.body, response, true)
+    sendPostAjax('configurations.update', req.headers, req.body, response, true)
 });
 
 //查询是否是开发者
 app.get('/developers_read', function (req, response) {
-    sendGetAjax('/developers.read', req.headers, req.query, response, true)
+    sendGetAjax('developers.read', req.headers, req.query, response, true)
 });
 
 module.exports = app;
