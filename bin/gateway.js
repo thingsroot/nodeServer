@@ -113,7 +113,7 @@ app.get('/gateways_historical_data', function(req, response){
 					name: obj.tag,
 					quality: item[ind],
 					time: item[0],
-					value: typeof item[valueInd] === 'number' ? item[valueInd] !== null ? item[valueInd].toFixed(2) : 0 : item[valueInd],
+					value: typeof item[valueInd] === 'number' ? item[valueInd] !== null ? item[valueInd] : 0 : item[valueInd],
 					vsn: obj.sn
 				})
 			})
