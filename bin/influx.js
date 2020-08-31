@@ -24,11 +24,8 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
     const reader = client.query(measurement)
 	if (func !== undefined) {
         reader.addFunction(func, field)
-        // reader.addFunction('mean("quality")')
-		// reader.addFunction(func, field)
 	} else {
-		reader.addField('value')
-		reader.addField('quality')
+        reader.addField(field, 'quality')
     }
     
 	if (conditions !== undefined) {
