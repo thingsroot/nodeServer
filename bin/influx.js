@@ -36,8 +36,10 @@ InfluxClient.query = function(database, measurement, func, field, conditions, gr
 	}
 	if (group_time !== undefined) {
 		reader.addGroup(group_time)
-	}
+    }
+    console.log(database, measurement, func, field, conditions, group_time, set, 'database, measurement, func, field, conditions, group_time, set')
     reader.then((data) => {
+        console.log(data, 'data')
         callback(data);
 	}).catch(console.error);
 };

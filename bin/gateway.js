@@ -447,7 +447,7 @@ app.get('/gateways_list', function(req, response){
 						data.device_devs_num = DevLen;
 						client.getAppLen(item[index]).then(AppLen=>{
 							data.device_apps_num = AppLen;
-							data.last_updated = data.modified.slice(0, -7)
+							data.last_updated = data.last_updated ? data.last_updated.slice(0, -7) : ''
 							arr.push(data)
 							queryGateway(index + 1, item, shared)
 						}).catch(()=>{
