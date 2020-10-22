@@ -99,4 +99,8 @@ app.get('/configurations_versions_list', function (req, response) {
 app.get('/applications_categories_list', function (req, response) {
     sendGetAjax('applications.categories.list', req.headers, req.query, response, true)
 });
+// 测试应用升级为正式应用
+app.post('/applications_release', function(req, response){
+    sendPostAjax('applications.versions.release', req.headers, req.body, response, true)
+});
 module.exports = app;
