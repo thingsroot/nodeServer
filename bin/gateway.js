@@ -89,7 +89,7 @@ app.get('/gateways_historical_data', function(req, response){
         } else {
             field = 'value';
         }
-		let func = obj.value_method && obj.value_method !== 'raw' ? obj.value_method : undefined
+        let func = obj.value_method && obj.value_method !== 'raw' ? obj.value_method : undefined
 		let group_time = func ? `time(${obj.group_time_span})` : undefined
 		let conditions = {
 			device: obj.vsn,
@@ -109,11 +109,12 @@ app.get('/gateways_historical_data', function(req, response){
             const valueInd = columns[1] !== 'quality' ? 1 : 2;
             const data = [];
 			arr.map(item=>{
-				data.push({
+                const value = typeof item[valueInd] === 'number' ? item[valueInd] !== null ? item[valueInd] : 0 : item[valueInd];
+				value !== null && data.push({
 					name: obj.tag,
 					quality: item[ind],
 					time: item[0],
-					value: typeof item[valueInd] === 'number' ? item[valueInd] !== null ? item[valueInd] : 0 : item[valueInd],
+					value,
 					vsn: obj.sn
 				})
 			})
